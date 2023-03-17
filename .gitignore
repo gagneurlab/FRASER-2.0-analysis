@@ -1,0 +1,21 @@
+# ignore snakemake
+.snakemake/
+.snakemake.*
+.wBuild*
+
+# ignore slurm
+slurm-*
+
+# ignore R files
+.RData
+.Rhistory
+.RDS
+
+#ignore RStudio files
+*.Rproj
+*.Rproj.user
+
+.Rproj.user
+
+# ignore misc files
+src/R/misc

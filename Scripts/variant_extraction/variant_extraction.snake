@@ -1,0 +1,96 @@
+#
+# Snake rules to generate the needed vcf files
+#
+# rare variants
+#  + splicing variants
+#  + high/modest impact
+#
+
+def get_input_vcf_anno(wildcards):
+   return config["vcf_files"][wildcards.dataset_vcf_group]["vcf_anno"]
+
+def get_input_vcf_gt(wildcards):
+   return config["vcf_files"][wildcards.dataset_vcf_group]["vcf_gt"]
+
+
+rule extractModeratNHighAnnoFromGTEx:
+    input: vcfanno = get_input_vcf_anno
+    output: subvcfannotbi = config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareModerateNHighVariants.vcf.gz.tbi"
+    threads: 3
+    resources:
+        mem_mb = 25000
+    shell:
+        """
+            vcfAnnoFileTbi={output.subvcfannotbi}
+            maxAF=0.05
+
+            vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
+            bcftools view --max-af $maxAF --max-alleles 2 {input.vcfanno} | \
+                grep -P '(^#)|(\|(MODERATE|HIGH)\|)' | \
+                bgzip -c -l 9 -@ 4 > $vcfAnnoFile
+            tabix $vcfAnnoFile
+        """
+
+
+rule extractSplicingAnnoFromGTEx:
+    input: vcfanno = get_input_vcf_anno
+    output: subvcfannotbi = config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareSplicingVariants.vcf.gz.tbi"
+    threads: 3
+    resources:
+        mem_mb = 25000
+    shell:
+        """
+            vcfAnnoFileTbi={output.subvcfannotbi}
+            maxAF=0.05
+            
+            echo {input.vcfanno}
+
+            vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
+            bcftools view --max-af $maxAF --max-alleles 2 {input.vcfanno} | \
+                grep -P '(^#)|([|&]splice_)' | \
+                bgzip -c -l 9 -@ 4 > $vcfAnnoFile
+            tabix $vcfAnnoFile
+        """
+
+rule extractIntronicAnnoFromGTEx:
+    input: vcfanno = get_input_vcf_anno
+    output: subvcfannotbi = config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareIntronicVariants.vcf.gz.tbi"
+    threads: 3
+    resources:
+        mem_mb = 25000
+    shell:
+        """
+            vcfAnnoFileTbi={output.subvcfannotbi}
+            maxAF=0.001
+
+            vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
+            bcftools view --max-af $maxAF --max-alleles 2 {input.vcfanno} | \
+                grep -P '(^#)|([|&]intron_)' | \
+                bgzip -c -l 9 -@ 4 > $vcfAnnoFile
+            tabix $vcfAnnoFile
+        """
+
+
+rule extractGenoTypeFromGTEx:
+    input: subvcfannotbi = config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/{varType}Variants.vcf.gz.tbi",
+        vcfgt = get_input_vcf_gt
+    output: subvcfgttbi =  config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/{varType}_gt.vcf.gz.tbi"
+    threads: 3
+    resources:
+        mem_mb = 200000
+    shell:
+        """
+            set -x
+            vcfAnnoFileTbi={input.subvcfannotbi}
+            vcfGTFileTbi={output.subvcfgttbi}
+            maxAF=0.001
+
+            vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
+            vcfGTFile=${{vcfGTFileTbi%.tbi}}
+
+            bcftools view --regions-file $vcfAnnoFile --max-af $maxAF {input.vcfgt} | \
+                bcftools sort --max-mem 100G --temp-dir '{input.subvcfannotbi}.tmp/' | \
+                bgzip -c -l 9 -@4 > $vcfGTFile
+            tabix $vcfGTFile
+        """
+
