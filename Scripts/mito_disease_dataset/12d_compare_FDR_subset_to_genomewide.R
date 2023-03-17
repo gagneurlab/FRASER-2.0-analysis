@@ -26,7 +26,7 @@
 #'                          "/results/{implementation}/" + config["mito_annotation"] + "/" +
 #'                          config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + 
 #'                          "/deltaJaccard{delta}/results_per_junction_blacklist.tsv", delta=config["deltaCutoff"], allow_missing=True)`'
-#'   - fraser1_res_gene_old: '`sm config["mito_fraser1_results"] + "/results/" + config["annotation"] + "/fraser/fib/results.tsv"`'
+#'   - fraser1_res_gene_old: '`sm config["mito_fraser1_results"] + "/results/" + config["mito_annotation"] + "/fraser/fib/results.tsv"`'
 #'   - sample_anno: '`sm config["mito_sample_anno"]`'
 #'   - full_sample_anno: '`sm config["mito_full_sample_anno"]`'
 #'   - omim_genes: '`sm config["omim_genes"]`'

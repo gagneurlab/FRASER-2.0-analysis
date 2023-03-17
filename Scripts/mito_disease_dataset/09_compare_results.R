@@ -18,7 +18,7 @@
 #'                          config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + 
 #'                          "/deltaJaccard{delta}/results_per_junction_blacklist.tsv", delta=config["deltaCutoff"], allow_missing=True)`'
 #'   - resultTableJunction_f1_old:  '`sm config["mito_fraser1_results"] + "/results/" + config["mito_annotation"] + "/fraser/fib/results_per_junction.tsv"`'
-#'   - sample_anno: '`sm config["mito_sample_anno"]``
+#'   - sample_anno: '`sm config["mito_sample_anno"]`'
 #'  output:
 #'   - ggplots: '`sm config["mito_processed_results"] + 
 #'                  "/ggplot_rds/{implementation}/" + config["mito_annotation"] + "/" +

@@ -11,7 +11,7 @@
 #'     - power_analysis_full_res_all: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_full.tsv"`'
 #'     - power_analysis_full_res_patho: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/patho_results_full.tsv"`'
 #'     - power_analysis_gtex: '`sm config["DATADIR"] + "/power_analysis/GTEx_v8/processed_results/aberrant_splicing/combined_results.tsv"`'
-#'     - patho_sample_anno: '`sm config["mito_sample_anno"]'`
+#'     - patho_sample_anno: '`sm config["mito_sample_anno"]`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigS9.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigS9.pdf"`'

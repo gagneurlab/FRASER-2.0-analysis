@@ -9,7 +9,7 @@
 #'     - mem_mb: 16000
 #'   input:
 #'     - common_genes_rds: '`sm expand(config["DATADIR"] + "/GTEx_v8/fraser2_improvements/tissue_reproducibility_FDR/{method}/reproducibility_genes_rareSpliceAI.Rds", method=["LeafcutterMD", "SPOT", "FRASER", "FRASER2"])`'
-#'     - gtex_anno: '`sm config["gtex_sample_anno"]`
+#'     - gtex_anno: '`sm config["gtex_sample_anno"]`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_reprod_stats.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_reprod_stats.pdf"`'

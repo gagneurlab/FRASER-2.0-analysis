@@ -10,6 +10,7 @@ slurm-*
 .RData
 .Rhistory
 .RDS
+Rplots.pdf
 
 #ignore RStudio files
 *.Rproj
@@ -17,5 +18,11 @@ slurm-*
 
 .Rproj.user
 
+# ignore logs
+logs/
+
 # ignore misc files
 src/R/misc
+
+# ignore Output folder
+Output/

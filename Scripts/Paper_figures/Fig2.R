@@ -14,9 +14,9 @@
 #'     - nr_outliers_per_sample:  '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/delta0.1/nrOutliers_comparison_ggplot.Rds"`'
 #'     - comb_outliers_rds: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/optQ/delta0.1/combined_outliers_venn.Rds"`'
 #'   output:
-#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig2_new.png"`'
-#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig2_new.pdf"`'
-#'    - outSvg: '`sm config["PAPER_FIGDIR"] + "/Fig2_new.svg"`'
+#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig2.png"`'
+#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig2.pdf"`'
+#'    - outSvg: '`sm config["PAPER_FIGDIR"] + "/Fig2.svg"`'
 #'   type: script
 #'---
 
@@ -28,9 +28,11 @@ library(ggpubr)
 library(cowplot)
 library(data.table)
 library(eulerr)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- snakemake@config$font_size
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 point_size <- 0.5
@@ -46,23 +48,24 @@ global_qq_plot <- global_qq_plot + ggtitle("")  +
     ) + 
     # guides(col = guide_legend(nrow = 4, title="")) +
     guides(col = guide_legend(nrow = 2, title="")) +
-    theme_pubr() +
-    theme(axis.title=element_text(face="bold"), 
-          legend.position="top",
-          # legend.position=c(0.35,0.75),
-          legend.background=element_rect(fill='transparent'),
-          text=element_text(size=font_size)) + 
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
+    # theme(legend.position=c(0.35,0.75),
+    #       legend.background=element_rect(fill='transparent')) +
     cowplot::background_grid(major="xy", minor="xy")
 global_qq_plot$layers[[1]]$aes_params$size <- point_size
 # global_qq_plot
+global_qq_plot$data[, .(lambda=unique(lambda)), by="type"]
 
 #+ read in outliers for venn plotting
 all_outliers <- readRDS(snakemake@input$comb_outliers_rds)
 names(all_outliers) <- c("FRASER", "FRASER 2.0")
 #+ create proportional venn diagram
 venn_plot <- plot(euler(all_outliers), 
-                  quantities = list(TRUE, type=c("counts", "percent"), fontsize=font_size),
-                  labels=list(fontsize=font_size),
+                  quantities = list(TRUE, type=c("counts", "percent"), 
+                                    fontsize=font_size, 
+                                    fontfamily=font),
+                  labels=list(fontsize=font_size, 
+                              fontfamily=font),
                   # fills=c("dodgerblue3", "purple4"),
                   fills=c("white", "white"),
                   # edges=c("black", "black")
@@ -116,18 +119,15 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
     guides(linetype = "none",
            color=guide_legend(order=1, nrow=2, title=""),
            shape=guide_legend(order=2,nrow=2, title="Nominal\np-value\ncutoff")) + 
-    theme_pubr() + 
-    cowplot::background_grid(major="xy", minor="xy") +
-    theme(
-        legend.position="top",
-        # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
-        # legend.background=element_rect(fill='transparent'),
-        # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
-        legend.title=element_text(size=font_size),
-        legend.text=element_text(size=font_size-2),
-        text=element_text(size=font_size),
-        axis.title=element_text(face="bold")
-    ) 
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
+    # theme(
+    #     # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
+    #     # legend.background=element_rect(fill='transparent'),
+    #     # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
+    #     legend.title=element_text(size=font_size),
+    #     legend.text=element_text(size=font_size-2)
+    # ) +
+    cowplot::background_grid(major="xy", minor="xy") 
 # g_var_rank_rec
 # g_var_rank_rec_VEP  <- var_recall_all_VEP[[paste0('recall_n=', maxRank)]] +
 #     scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
@@ -199,16 +199,14 @@ nr_outliers_per_sample_plot <- ggplot(nr_outliers_per_sample_dt_gtex,
     # coord_flip() + 
     annotation_logticks(sides="l") +
     # annotation_logticks(sides="b") + 
-    theme_pubr() +
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
     theme(
         legend.title = element_blank(),
-        legend.position = "top",
         # axis.text.x=element_text(angle=45, hjust=1, vjust=1),
-        # plot.margin=unit(c(0.5,0.5,0.5,2.75), "cm"), 
+        # plot.margin=unit(c(0.5,0.5,0.5,2.75), "cm"),
         axis.text.x=element_text(angle=90, hjust=1, vjust=1),
-        plot.margin=unit(c(0.5,0.5,1,0.5), "cm"),
-        axis.title=element_text(face="bold"),
-        text=element_text(size=font_size)) +
+        plot.margin=unit(c(0.5,0.5,1,0.5), "cm")
+    ) +
     cowplot::background_grid(major="y", minor="y")
 # nr_outliers_per_sample_plot
 
@@ -224,6 +222,7 @@ nr_outliers_per_sample_plot <- ggplot(nr_outliers_per_sample_dt_gtex,
 col1 <- ggarrange(global_qq_plot, 
                   venn_plot,
                   labels=LETTERS[c(1,3)], 
+                  font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
                   align="hv",
                   nrow=2, ncol=1,
                   heights=c(1.8,1))
@@ -231,11 +230,13 @@ row1 <- ggarrange(col1,
                 ggarrange(
                     g_var_rank_rec,
                     labels=LETTERS[2]),
+                    font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
                 align="hv",
                 nrow=1, ncol=2,
                 widths=c(1,2))
 row2 <- ggarrange(nr_outliers_per_sample_plot,
                   labels=LETTERS[4], 
+                  font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
                   nrow=1, ncol=1)
 # row2 <- ggarrange(seq_depth_cor_tissue_plot,
 #                   seq_depth_cor_all_plot,

@@ -9,7 +9,7 @@
 #'   - mem_mb: 20000
 #'  py:
 #'  - | 
-#'   with open('/s/project/fraser/fraser2/processed_data/variants/prokisch_dna_ids.txt') as f:
+#'   with open(config["mito_processed_data"] + '/variants/prokisch_dna_ids.txt') as f:
 #'    dna_ids = f.read().splitlines()
 #'  input:
 #'   - dna_id_list: '`sm config["mito_processed_data"] + "/variants/prokisch_dna_ids.txt"`'

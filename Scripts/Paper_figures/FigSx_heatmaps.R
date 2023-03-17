@@ -9,7 +9,7 @@
 #'     - mem_mb: 64000
 #'   input:
 #'     - fds_files: '`sm expand(config["DATADIR"] + "/GTEx_v8/fds/minK20_25_minN10/PCA__pc0.1/savedObjects/{dataset}__optQ__newFilt/predictedMeans_jaccard.h5", dataset=["Muscle_-_Skeletal", "Skin_-_Not_Sun_Exposed_Suprapubic", "Whole_Blood"])`'
-#'     - gtex_annotation: '`sm config["gtex_sample_anno"]`
+#'     - gtex_annotation: '`sm config["gtex_sample_anno"]`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_heatmaps.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_heatmaps.pdf"`'

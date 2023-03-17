@@ -14,7 +14,7 @@
 #'     - udn_nr_outliers_comparison: '`sm config["DATADIR"] + "/udn/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/delta0.1/nrOutliers_comparison_ggplot.Rds"`'
 #'     - power_analysis_full_res_all: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_full.tsv"`'
 #'     - power_analysis_full_res_patho: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/patho_results_full.tsv"`'
-#'     - patho_sample_anno: '`sm config["mito_sample_anno"]'`
+#'     - patho_sample_anno: '`sm config["mito_sample_anno"]`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig4.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig4.pdf"`'
@@ -33,9 +33,11 @@ library(ggbeeswarm)
 library(data.table)
 library(tidyverse)
 library(magrittr)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- snakemake@config$font_size
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 point_size <- 0.5
@@ -45,83 +47,7 @@ f2_vs_f1_plots <- readRDS(snakemake@input$prokisch_f2_vs_f1_plots)
 fdr_comparison_plots <- readRDS(snakemake@input$prokisch_fdr_comparison)
 udn_plots <- readRDS(snakemake@input$udn_nr_outliers_comparison)
 
-
-# g_venn_wo_F1 <- fdr_comparison_plots[["FDR_venn_wo_F1"]] +
-#     theme(axis.title=element_text(face="bold"),
-#           text=element_text(size=font_size))
-
-#+ create proportional venn diagram
-# venn_dt <- fdr_comparison_plots[["FDR_venn_wo_F1"]]$data
-# venn_ls <- list(FRASER2 = venn_dt[FRASER2 == TRUE, values],
-#                 "FRASER2 (OMIM + RV)" = venn_dt[`FRASER2 (OMIM + RV)` == TRUE , values],
-#                 "Pathogenic events" = venn_dt[`pathogenic
-# splice defect` == TRUE, values])
-# library(eulerr)
-# venn_plot <- plot(euler(venn_ls), 
-#                   quantities = list(TRUE, type=c("counts", "percent"), fontsize=font_size),
-#                   labels=list(fontsize=font_size)#,
-#                   # fills=c("lightblue", "purple4")
-# )
-# venn_plot
-
-# # draw venn manual for main figure plot
-# # get set sizes
-# venn_dt <- g_venn_wo_F1$data
-# venn_dt[, FRASER := NULL]
-# area_dt <- melt(venn_dt, id.vars="values", variable.name="Set", value.name="present")
-# area_dt <- area_dt[present == TRUE,]
-# area_dt[, comb:=paste(Set, collapse=","), by="values"]
-# area_dt <- area_dt[!duplicated(values)]
-# area_sizes <- area_dt[, table(comb)]
-# area_labels <- as.data.table(area_sizes)
-# area_labels[, x:=c(0, 2.5, 1.5, 1.5, 2.25, 0.75)]
-# area_labels[, y:=c(0.2, 0.2, 0.2, -0.7, -0.7, -0.7)]
-# 
-# gen_circle <- function(group, x_offset = 0, y_offset = 0, radius = 1,
-#                        radius_b = radius, theta_offset = 0, length.out = 100) {
-#     tibble(group = group,
-#            theta = seq(0, 2 * pi, length.out = length.out)) %>%
-#         mutate(x_raw = radius * cos(theta),
-#                y_raw = radius_b * sin(theta),
-#                x = x_offset + x_raw * cos(theta_offset) - y_raw * sin(theta_offset),
-#                y = y_offset + x_raw * sin(theta_offset) + y_raw * cos(theta_offset))
-# }
-# 
-# g_venn_wo_F1_manual <- ggplot() +
-#     geom_polygon(aes(x = x, y = y),
-#                  data = gen_circle(group = 0L, x_offset = 0, y_offset = 0, radius = 2),
-#                  color = "purple4", fill = "purple4", alpha = .5) +
-#     geom_polygon(aes(x = x, y = y),
-#                  data = gen_circle(group = 0L, x_offset = 2, y_offset = 0, radius = 1, radius_b = 1),
-#                  color = "purple1" , fill = "purple1", alpha = .5) +
-#     geom_polygon(aes(x = x, y = y),
-#                  data = gen_circle(group = 0L, x_offset = 1.5, y_offset = -0.7, radius = 1.2, radius_b=0.3),
-#                  color = "darkgreen" , fill = "darkgreen", alpha = .5) +
-#     geom_text(data=area_labels, aes(label=N, x=x, y=y), size=3) +
-#     geom_text(data=area_labels[c(1, 2,6)], aes(label=comb, x=x-1, y=ifelse(y>0, y+1, y-1)), size=3) +
-#     theme_nothing() 
-# # g_venn_wo_F1_manual
-
-boxplot_prokisch <- fdr_comparison_plots[["boxplots_numOut_gene"]] + 
-    labs(y="Splicing outliers\nper sample + 1",
-         title="Mitochondrial disease cohort") +
-    scale_color_manual(values=c("dodgerblue3", "purple4", "purple1")) +
-    theme(axis.title=element_text(face="bold"),
-          plot.title=element_text(face="bold", size=font_size),
-          text=element_text(size=font_size)) + 
-    cowplot::background_grid(major="y", minor="y")
-
-udn_dt <- dcast(udn_plots[["boxplots_numOut_gene"]]$data[, median(num_out), by="method,dataset_name"], dataset_name ~ method)[, fc := FRASER/FRASER2]
-udn_dt
-g_boxplot_udn <- udn_plots[["boxplots_numOut_gene"]] +
-    labs(y="Splicing outliers\nper sample + 1",
-         title="Undiagnosed Disease Network (UDN)") +
-    scale_color_manual(values=c("dodgerblue3", "purple4", "purple1")) +
-    theme(axis.title=element_text(face="bold"),
-          plot.title=element_text(face="bold", size=font_size),
-          text=element_text(size=font_size)) +
-    cowplot::background_grid(major="y", minor="y")
-
+# boxplot of number of outliers in different cohorts
 mito_dt <- fdr_comparison_plots[["boxplots_numOut_gene"]]$data
 mito_dt[, dataset_group:="Mitochondrial disease cohort"]
 mito_dt[, dataset_label:=paste0("Fibroblasts (N=", uniqueN(sampleID),")")]
@@ -166,20 +92,13 @@ g_boxplot_all <- ggplot(num_out_dt, aes(dataset_label, num_out+1, col=method)) +
     labs(x="", y="Splicing outliers\nper sample + 1") +
     scale_y_log10() +
     scale_color_manual(values=c("dodgerblue3", "purple4", "purple1", "violetred")) +
-    theme_pubr() +
-    theme(
-        legend.title = element_blank(),
-        legend.position = "top",
-        # axis.text.x=element_text(angle=45, hjust=1, vjust=1),
-        # axis.text.x=element_text(angle=90, hjust=1, vjust=1),
-        # plot.margin=unit(c(0.5,0.5,1,0.5), "cm"),
-        axis.title=element_text(face="bold"),
-        text=element_text(size=font_size)) +
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
+    theme(legend.title = element_blank()) +
     cowplot::background_grid(major="y", minor="y")
 a <- annotation_logticks(sides='l')
 a$data <- data.frame(x=NA, dataset_group="Mitochondrial disease cohort") # have logticks only on left facet
 g_boxplot_all <- g_boxplot_all + a
-g_boxplot_all
+# g_boxplot_all
 
 # fdr_comparison_plots <- readRDS(snakemake@input$prokisch_fdr_comparison)
 upset_dt <- fdr_comparison_plots[["gg_upset"]]$data
@@ -237,10 +156,12 @@ upset_plot <- ggplot(upset_dt, aes(x=comb)) +
     labs(x="", y="") +
     geom_text(aes(label = ..count..), stat = 'count', nudge_y = 500, 
               size=font_size/.pt) +
-    theme(text=element_text(size=font_size)) +
-    theme_combmatrix(combmatrix.label.text = element_text(size=font_size)) + 
+    # theme(text=element_text(size=font_size)) +
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
+    theme_combmatrix(combmatrix.label.text = element_text(size=font_size, 
+                                                          family = font)) + 
     cowplot::background_grid(major="y", minor="y")
-upset_plot
+# upset_plot
 
 #+ power analysis results
 # pathogenic cases
@@ -265,12 +186,8 @@ gprop <- ggplot(res_tps[padjustGene <= 0.1, .(Noutliers=.N, prop=.N/length(patho
         y = paste0('Percentage of recovered\n splicing outliers (n=', length(patho_tmp), ')'),
         x = 'Sample size') +
     scale_y_continuous(limits=c(0, 100)) +
-    theme_pubr() +
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size),
-          axis.text.x=element_text(size=font_size,
-                                   angle=45, hjust=1, vjust=0.9)
-        ) + 
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
+    theme(axis.text.x=element_text(angle=45, hjust=1, vjust=0.9)) + 
     cowplot::background_grid(major="xy", minor="xy")
 # gprop
 
@@ -300,13 +217,15 @@ gg_row2 <- ggarrange(
     gprop,
     nrow=1, ncol=2,
     labels=LETTERS[2:3],
+    font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
     widths=c(1.5,1)
 )
 gg_figure <- ggarrange(g_boxplot_all,
                        gg_row2,
                        nrow=2, ncol=1,
                        heights=c(1,1), 
-                       labels=c(LETTERS[1], ""))
+                       labels=c(LETTERS[1], ""),
+                       font.label = list(size = 12, color = "black", face = "bold"))#, family = "Arial"))
 gg_figure
 
 #+ save figure as png and pdf

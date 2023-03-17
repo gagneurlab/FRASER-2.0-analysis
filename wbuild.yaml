@@ -1,5 +1,5 @@
 ---
-projectTitle: Analyis pipeline for the FRASER 2.0 manuscript
+projectTitle: Analyis pipeline for the FRASER 2 manuscript
 htmlOutputPath: Output/html
 scriptsPath: Scripts
 fileRegex: .*
@@ -11,7 +11,8 @@ PAPER_FIGDIR: "/s/project/fraser/fraser2/figures/paper_figures"
 figdir: '/s/project/fraser/fraser2/figures'
 
 # paper figure params:
-font_size: 8 #7
+font_size: 8 
+font: "sans" # "Arial"
 page_width: 178
 width_unit: "mm"
 
@@ -66,8 +67,8 @@ mito_bam_coverage_tsv: '/s/project/prokisch/processed_data/aberrant_expression/v
 ###
 gtex_sample_anno: '/s/project/gtex_genetic_diagnosis/v8/sample_annotation.tsv'
 # dataset that will be used for enrichment
-# dataset_name: ["Skin_-_Not_Sun_Exposed_Suprapubic", "Whole_Blood", "Muscle_-_Skeletal", "Brain_-_Cortex", "Heart_-_Left_Ventricle", "Lung", "Liver", 
-#                 "Pancreas", "Brain_-_Amygdala", "Brain_-_Cerebellum", "Colon_-_Sigmoid"] 
+# dataset_name: ["Skin_-_Not_Sun_Exposed_Suprapubic", "Whole_Blood", "Muscle_-_Skeletal", "Brain_-_Cortex", "Heart_-_Left_Ventricle", "Lung", "Liver",
+#                 "Pancreas", "Brain_-_Amygdala", "Brain_-_Cerebellum", "Colon_-_Sigmoid"]
 datasets: {
     "Adipose_-_Subcutaneous": {
         "fds_file": "/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_splicing/datasets/savedObjects/Adipose_-_Subcutaneous_old_filter/pvaluesBetaBinomial_junction_theta.h5",
@@ -500,7 +501,7 @@ datasets: {
         "txdb": "/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/txdb.db",
         "orgdb": "/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/gene_name_mapping_gencode34.tsv",
         "genomeAssembly": "hg38"
-    }
+    },
     "Fibroblasts": {
         "fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/Fibroblasts/pvaluesBetaBinomial_junction_theta.h5",
         "raw_fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/raw-Fibroblasts/theta.h5",
@@ -508,7 +509,7 @@ datasets: {
         "txdb": "/s/project/genetic_diagnosis/udn/processed_data/preprocess/v29/txdb.db",
         "orgdb": "/s/project/genetic_diagnosis/udn/processed_data/preprocess/v29/gene_name_mapping_v29.tsv",
         "genomeAssembly": "hg19"
-    }, 
+    },
     "blood_polya": {
         "fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/blood_polya/pvaluesBetaBinomial_junction_theta.h5",
         "raw_fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/raw-blood_polya/theta.h5",
@@ -516,7 +517,7 @@ datasets: {
         "txdb": "/s/project/genetic_diagnosis/udn/processed_data/preprocess/v29/txdb.db",
         "orgdb": "/s/project/genetic_diagnosis/udn/processed_data/preprocess/v29/gene_name_mapping_v29.tsv",
         "genomeAssembly": "hg19"
-    }, 
+    },
     "blood_total_rna": {
         "fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/blood_total_rna/pvaluesBetaBinomial_junction_theta.h5",
         "raw_fds_file": "/s/project/genetic_diagnosis/udn/processed_data/aberrant_splicing/datasets/savedObjects/raw-blood_total_rna/theta.h5",
@@ -532,7 +533,7 @@ vcf_files: {
     "GTEx_v8": {
         "vcf_anno": "/s/raw/gtex/v8/hg38/GenotypeFiles/phg001219.v1.GTEx_v8_WGS.genotype-calls-vcf.c1/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_AllVar_QC_metrics.vep_anno_only.vcf.gz",
         "vcf_gt":   "/s/raw/gtex/v8/hg38/GenotypeFiles/phg001219.v1.GTEx_v8_WGS.genotype-calls-vcf.c1/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_AllVar_QC_metrics.vcf.gz",
-    } 
+    }
 }
 
 # max MAF for variant enrichment
@@ -651,7 +652,7 @@ tissues_for_reproducibility: [
 ]
 
 
-# datasets from power analysis 
+# datasets from power analysis
 power_analysis_runs: 5
 power_analysis_sizes: [30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300]
 power_analysis_datasets: [

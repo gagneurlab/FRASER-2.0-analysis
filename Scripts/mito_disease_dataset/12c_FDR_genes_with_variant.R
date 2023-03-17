@@ -10,7 +10,7 @@
 #'  input:
 #'   - fraser2_fds: '`sm config["mito_processed_results"] + 
 #'                "/datasets/{implementation}/savedObjects/" + 
-#'                config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + "--" + config["annotation"] + 
+#'                config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + "--" + config["mito_annotation"] + 
 #'                "/padjBetaBinomial_rho0.1_jaccard.h5"`'
 #'   - sample_anno: '/s/project/genetic_diagnosis/rna_paper/sa_solved.tsv'
 #'   - full_sample_anno: '/s/project/prokisch/sample_annotation.tsv'

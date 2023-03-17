@@ -42,9 +42,11 @@ library(ggplot2)
 library(ggpubr)
 # library(gridExtra)
 library(cowplot)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
-font_size <- 12 # snakemake@config$font_size
+font_size <- 14 # snakemake@config$font_size
+# font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 point_size <- 0.5
@@ -109,17 +111,9 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
     guides(linetype = "none",
            color=guide_legend(order=1, nrow=2, title="Splice metric"),
            shape=guide_legend(order=2,nrow=2, title="Nominal\np-value\ncutoff")) + 
-    theme_pubr() + 
+    theme_manuscript(fig_font=font, fig_font_size=font_size) +
     cowplot::background_grid(major="xy", minor="xy") +
     theme(
-        legend.position="top",
-        # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
-        # legend.background=element_rect(fill='transparent'),
-        # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
-        legend.title=element_text(size=font_size),
-        legend.text=element_text(size=font_size-2),
-        text=element_text(size=font_size),
-        axis.title=element_text(face="bold"),
         plot.margin=unit(c(0,1,0.25,0.25), units="cm")
     ) 
 

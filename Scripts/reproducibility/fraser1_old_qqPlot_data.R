@@ -22,12 +22,27 @@ register(MulticoreParam(snakemake@threads))
 #+ read in FRASER2 and FRASER1 fds
 fds <- loadFraserDataSet(file=snakemake@input$fraser1_fds)
 
+#+ lambda inflation
+inflation <- function(p) {
+    chisq <- qchisq(p, df=1, lower.tail=FALSE)
+    lambda <- median(chisq) / qchisq(0.5, 1)
+    lambda
+}
+lambda_psi5 <- inflation(c(pVals(fds, type="psi5", level="junction")))
+lambda_psi3 <- inflation(c(pVals(fds, type="psi3", level="junction")))
+lambda_theta <- inflation(c(pVals(fds, type="theta", level="junction")))
+lambda_dt <- data.table(lambda=c(lambda_psi5, lambda_psi3, lambda_theta),
+                        type=c("psi5", "psi3", "theta"))
+
 #+ get qq-plot for fraser2
 (f1_qq <- plotQQ(fds, global=TRUE, aggregate=FALSE, type=c("psi3", "psi5", "theta")) )
 f1_qq_data <- as.data.table(f1_qq$data)
 conv_int_data <- as.data.table(f1_qq$layers[[2]]$data)
 f1_qq_data <- f1_qq_data[type != unique(conv_int_data$type), ]
 f1_qq_data <- rbind(f1_qq_data, conv_int_data, fill=TRUE)
+
+#+ add lambdas
+f1_qq_data <- merge(f1_qq_data, lambda_dt, by="type", all.x=TRUE)
 
 #+ save qq plot data as table
 fwrite(f1_qq_data, file=snakemake@output$qq_plot_table)

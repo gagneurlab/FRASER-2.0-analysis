@@ -9,7 +9,7 @@
 #'     - mem_mb: 24000
 #'   input:
 #'   - res_simulations: '`sm expand(config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/results/" + 
-#'                "v29/fraser/{group}/results.tsv", group=config["power_analysis_sim"])`'
+#'                "v29/fraser/{group}/results.tsv", group=config["power_analysis_datasets"])`'
 #'   - patho_sample_anno: '`sm config["mito_sample_anno"]`' 
 #'   output:
 #'    - comb_results: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_{FDR_set}.tsv"`'

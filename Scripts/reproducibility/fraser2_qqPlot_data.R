@@ -23,10 +23,19 @@ register(MulticoreParam(snakemake@threads))
 #+ read in FRASER2 and FRASER1 fds
 fds <- loadFraserDataSet(file=snakemake@input$fraser2_fds)
 
+#+ lambda inflation
+inflation <- function(p) {
+    chisq <- qchisq(p, df=1, lower.tail=FALSE)
+    lambda <- median(chisq) / qchisq(0.5, 1)
+    lambda
+}
+lambda_jaccard <- inflation(c(pVals(fds, type="jaccard", level="junction")))
+
 #+ get qq-plot for fraser2
 (f2_qq <- plotQQ(fds, global=TRUE, aggregate=FALSE, type="jaccard") )
 # f2_qq_data <- as.data.table(f2_qq$data)
 f2_qq_data <- as.data.table(f2_qq$layers[[2]]$data)
+f2_qq_data[, lambda := lambda_jaccard]
 
 #+ save qq plot data as table
 fwrite(f2_qq_data, file=snakemake@output$qq_plot_table)
