@@ -13,12 +13,12 @@
 #'     t = wildcards.dataset
 #'     tissue = t.replace('-_', '')
 #'     tissue = tissue.replace('-', '_')
-#'     return "/data/cephrbgssd/project/absplice/data/results/gtex_v8_with_general_workflow/FRASER-analysis_data/Data/paperPipeline/processedData/spot/" + tissue + "/spot__fullResults.tsv"
+#'     return config["spot_results"] + tissue + "/spot__fullResults.tsv"
 #'    def get_leafcutterMD_tissue_clean(wildcards):
 #'     t = wildcards.dataset
 #'     tissue = t.replace('-_', '')
 #'     tissue = tissue.replace('-', '_')
-#'     return "/data/cephrbgssd/project/absplice/data/results/gtex_v8_with_general_workflow/FRASER-analysis_data/Data/paperPipeline/processedData/leafcutter/" + tissue + "/leafcutterMD_testing/results_" + tissue + ".tsv"
+#'     return config["leafcutterMD_results"] + tissue + "/leafcutterMD_testing/results_" + tissue + ".tsv"
 #'   threads: 5
 #'   resources:
 #'     - mem_mb: 40000
@@ -43,7 +43,6 @@ saveRDS(snakemake, snakemake@log$snakemake)
 
 #+ load needed packages
 .libPaths("~/R/4.1/FRASER2")
-# .libPaths("~/R/4.1/FRASER2_BB_loss")
 # message("libPath is ", .libPaths())
 library(data.table)
 library(ggplot2)
@@ -64,7 +63,7 @@ dataset <- snakemake@wildcards$dataset
 input_files <- snakemake@input[!names(snakemake@input) %in% c("", "variant_table", "RScript")]
 
 # blacklist regions
-blacklist_regions <- snakemake@config$blacklist_regions
+blacklist_regions <- snakemake@config$blacklist_regions_hg38
 blacklist_gr <- rtracklayer::import(blacklist_regions, format = "BED")
 gene_info <- fread(snakemake@config$datasets[[dataset]]$orgdb)
 gene_gr <- makeGRangesFromDataFrame(gene_info, keep.extra.columns=TRUE)
@@ -281,7 +280,7 @@ rrdt <- rbindlist(bplapply(methods2plot, dt=mafsub, BPPARAM=BPPARAM,
                            }))
 method_order <- c("LeafcutterMD", "SPOT", "FRASER", "IntronJaccardIndex", "FRASER2")
 rrdt[, Method:=factor(Method, levels=method_order)]
-rrdt <- rbind(rrdt, data.table(Method="totalPossibleRank", nTrueHits=totalHits <- sum(!is.na(mafsub[,simple_conseq])), recall=0, precision=0, rank=mafsub[, .N], Type="FDR"))
+rrdt <- rbind(rrdt, data.table(Method="totalPossibleRank", nTrueHits=sum(!is.na(mafsub[,simple_conseq])), recall=0, precision=0, rank=mafsub[, .N], Type="FDR"))
 rrdt
 
 

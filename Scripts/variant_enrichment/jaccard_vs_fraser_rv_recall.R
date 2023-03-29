@@ -13,12 +13,12 @@
 #'     t = wildcards.dataset
 #'     tissue = t.replace('-_', '')
 #'     tissue = tissue.replace('-', '_')
-#'     return "/data/cephrbgssd/project/absplice/data/results/gtex_v8_with_general_workflow/FRASER-analysis_data/Data/paperPipeline/processedData/spot/" + tissue + "/spot__fullResults.tsv"
+#'     return config["spot_results"] + tissue + "/spot__fullResults.tsv"
 #'    def get_leafcutterMD_tissue_clean(wildcards):
 #'     t = wildcards.dataset
 #'     tissue = t.replace('-_', '')
 #'     tissue = tissue.replace('-', '_')
-#'     return "/data/cephrbgssd/project/absplice/data/results/gtex_v8_with_general_workflow/FRASER-analysis_data/Data/paperPipeline/processedData/leafcutter/" + tissue + "/leafcutterMD_testing/results_" + tissue + ".tsv"
+#'     return config["leafcutterMD_results"] + tissue + "/leafcutterMD_testing/results_" + tissue + ".tsv"
 #'   threads: 5
 #'   resources:
 #'     - mem_mb: 40000

@@ -10,7 +10,6 @@
 #'   input:
 #'     - global_qq: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/optQ/PCA__pc0.1/Skin_-_Not_Sun_Exposed_Suprapubic/global_qqPlots.Rds"`'
 #'     - variant_recall_all_tissues: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/plot_rds/FRASER2_vs_others_allTissues_rv_recall_plots_{varType}.Rds", varType=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
-#'     - variant_enrich_skin: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/all_final_rv_recall_ggplots.Rds"`'
 #'     - nr_outliers_per_sample:  '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/delta0.1/nrOutliers_comparison_ggplot.Rds"`'
 #'     - comb_outliers_rds: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/optQ/delta0.1/combined_outliers_venn.Rds"`'
 #'   output:
@@ -49,8 +48,6 @@ global_qq_plot <- global_qq_plot + ggtitle("")  +
     # guides(col = guide_legend(nrow = 4, title="")) +
     guides(col = guide_legend(nrow = 2, title="")) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
-    # theme(legend.position=c(0.35,0.75),
-    #       legend.background=element_rect(fill='transparent')) +
     cowplot::background_grid(major="xy", minor="xy")
 global_qq_plot$layers[[1]]$aes_params$size <- point_size
 # global_qq_plot
@@ -66,24 +63,19 @@ venn_plot <- plot(euler(all_outliers),
                                     fontfamily=font),
                   labels=list(fontsize=font_size, 
                               fontfamily=font),
-                  # fills=c("dodgerblue3", "purple4"),
                   fills=c("white", "white"),
-                  # edges=c("black", "black")
                   edges=c("dodgerblue3", "purple4"),
                 
 )
 venn_plot
 
-# precision recall on one tissue
-# var_enrich_plots <- readRDS(snakemake@input$variant_enrich_fdr_all)
-# var_enrich_plots <- readRDS(snakemake@input$variant_enrich_skin)
-# maxRank <- 50000
-# g_var_rank_rec_VEP  <- var_enrich_plots[[paste0('recall_n=', maxRank, "__rareSplicing")]] +
+#+ precision rank plot jointly on all tissues
 var_recall_all_VEP <- readRDS(snakemake@input$variant_recall_all_tissues[[1]])
 var_recall_all_SpliceAI <- readRDS(snakemake@input$variant_recall_all_tissues[[2]])
 var_recall_all_MMSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[3]])
 var_recall_all_AbSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[4]])
 maxRank <- 5e6
+maxRankForPlot <- 3e6
 
 recall_rank_dt <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
                         (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare SpliceAI"],
@@ -110,75 +102,21 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
                 col="firebrick", linetype="dashed") + 
     scale_shape_discrete(labels=function(x)parse(text=x)) +
     scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4", "violetred")) +
-    scale_x_continuous(breaks=seq(0, maxRank, by=1250000),
-                       # labels=function(x) ifelse(x == 2.5e6 | x == 7.5e6, "", scientific_10(x)),
-                       labels=c(0, scientific_10(1250000), "", scientific_10(3750000), ""),
-                       limits=c(0, maxRank)) +
+    scale_x_continuous(breaks=seq(0, maxRankForPlot, by=1e6),
+                       labels=function(x) ifelse(x == 3e6, "", scientific_10(x)),
+                       # labels=scientific_10,
+                       limits=c(0, maxRankForPlot)) +
     labs(title="", 
          x="Top N outliers", y="Recall of rare splice-disrupting\ncandidate variants") + 
     guides(linetype = "none",
            color=guide_legend(order=1, nrow=2, title=""),
            shape=guide_legend(order=2,nrow=2, title="Nominal\np-value\ncutoff")) + 
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
-    # theme(
-    #     # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
-    #     # legend.background=element_rect(fill='transparent'),
-    #     # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
-    #     legend.title=element_text(size=font_size),
-    #     legend.text=element_text(size=font_size-2)
-    # ) +
     cowplot::background_grid(major="xy", minor="xy") 
 # g_var_rank_rec
-# g_var_rank_rec_VEP  <- var_recall_all_VEP[[paste0('recall_n=', maxRank)]] +
-#     scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
-#     scale_x_continuous(breaks=seq(0, maxRank, by=250000),
-#                        labels=function(x) ifelse(x == 2.5e5 | x == 7.5e5, "", scientific_10(x)),
-#                        limits=c(0, maxRank)) +
-#     labs(title="", y="Recall of rare splice\naffecting variants (VEP)") + 
-#     guides(shape="none", color=guide_legend(nrow=2, title="")) +
-#     theme_pubr() + 
-#     cowplot::background_grid(major="xy", minor="xy") +
-#     theme(
-#         legend.position="top",
-#         # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
-#         # legend.background=element_rect(fill='transparent'),
-#         # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
-#         legend.title=element_text(size=font_size),
-#         legend.text=element_text(size=font_size-2),
-#         text=element_text(size=font_size),
-#         axis.title=element_text(face="bold")
-#     ) 
-# # g_var_rank_rec_VEP
 
-# g_var_rank_rec_mmsplice  <- var_enrich_plots[[paste0('recall_n=', maxRank, "__rareMMSplice")]] +
-# g_var_rank_rec_mmsplice  <- var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]] +
-#     scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
-#     scale_x_continuous(breaks=seq(0, maxRank, by=250000),
-#                        labels=function(x) ifelse(x == 2.5e5 | x == 7.5e5, "", scientific_10(x)),
-#                        limits=c(0, maxRank)) +
-#     labs(title="", y="Recall of rare splice\naffecting variants (MMSplice)") + 
-#     guides(color = "none", shape=guide_legend(nrow=2, title="Nominal\np-value\ncutoff")) + 
-#     theme_pubr() + 
-#     cowplot::background_grid(major="xy", minor="xy") +
-#     theme(
-#         legend.position="top",
-#         # legend.position=c(0.17, 0.95), # for rank-recall plot of all nominal pvals
-#         # legend.background=element_rect(fill='transparent'),
-#         # legend.position=c(0.85, 0.3), # for rank-recall plot of FDR signif
-#         legend.title=element_text(size=font_size),
-#         legend.text=element_text(size=font_size-2),
-#         text=element_text(size=font_size),
-#         axis.title=element_text(face="bold")
-#     ) 
-# # g_var_rank_rec_mmsplice
-
+### nr of outliers per sample comparison
 nr_outliers_per_sample_dt_gtex <- readRDS(snakemake@input$nr_outliers_per_sample)$data
-# fc_dt <- dcast(nr_outliers_per_sample_dt_gtex[, median(nr_outliers_per_sample), by="tissue,method"], tissue ~ method, value.var="V1")[, fc:=FRASER2/FRASER]
-fc_dt <- dcast(nr_outliers_per_sample_dt_gtex[, median(nr_outliers_per_sample), by="tissue,method"], tissue ~ method, value.var="V1")[, fc:=FRASER/FRASER2]
-fc_dt[, summary(fc)]
-fc_dt[, .(median_fc=median(fc), mean_fc=mean(fc), sd_fc=sd(fc))]
-# across all tissues combined
-nr_outliers_per_sample_dt_gtex[, median(nr_outliers_per_sample), by="method"]
 
 # nr of outliers per sample (GTEx)
 nr_outliers_per_sample_dt_gtex[, dataset_group := "GTEx"]
@@ -211,14 +149,6 @@ nr_outliers_per_sample_plot <- ggplot(nr_outliers_per_sample_dt_gtex,
 # nr_outliers_per_sample_plot
 
 #+ combine panels into figure, width=12, height=20
-# row1 <- ggarrange(global_qq_plot, 
-#                     # g_var_rank_rec_VEP,
-#                     # g_var_rank_rec_mmsplice,
-#                     g_var_rank_rec,
-#                     labels=LETTERS[1:2], 
-#                     align="hv",
-#                     nrow=1, ncol=2,
-#                     widths=c(1,2))
 col1 <- ggarrange(global_qq_plot, 
                   venn_plot,
                   labels=LETTERS[c(1,3)], 
@@ -238,24 +168,14 @@ row2 <- ggarrange(nr_outliers_per_sample_plot,
                   labels=LETTERS[4], 
                   font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
                   nrow=1, ncol=1)
-# row2 <- ggarrange(seq_depth_cor_tissue_plot,
-#                   seq_depth_cor_all_plot,
-#                   labels=LETTERS[4:5], 
-#                   align="hv",
-#                   nrow=1, ncol=2,
-#                   widths=c(2,1))
 gg_figure <- ggarrange(row1, 
                        row2,
                        align="hv",
                        nrow=2, ncol=1,
                        heights=c(1,1))
-                       # heights=c(1,1.66))
-                       # heights=c(1.25,1))
 gg_figure
 
 #+ save figure as png and pdf
-# ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=15, height=13)
-# ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=15, height=13)
 ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=1.5*page_width, unit=width_unit)
 ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=1.5*page_width, unit=width_unit)
 ggsave(plot=gg_figure, filename=snakemake@output$outSvg, width=page_width, height=1.5*page_width, unit=width_unit, dpi=350)

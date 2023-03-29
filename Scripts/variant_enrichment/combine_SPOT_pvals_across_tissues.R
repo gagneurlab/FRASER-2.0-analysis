@@ -18,6 +18,7 @@
 #'     - SPOT_p: '`sm get_spot_tissue_clean`'
 #'   output:
 #'     - spot_all_rds: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/SPOT_allTissues_pvals_for_rv.Rds"`'
+#'     - spot_all_fdrSignif_rds: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/SPOT_allTissues_pvals_aberrant_for_rv.Rds"`'
 #'   type: script
 #'---
 
@@ -28,11 +29,17 @@ library(data.table)
 library(BiocParallel)
 register(MulticoreParam(snakemake@threads))
 
-#+ read and save combined pvals (SPOT)
-all_res <- rbindlist(bplapply(snakemake@input$SPOT_p, function(in_file, method_name){
+#+ function to combine pval matrices across tissues to one data.table
+combine_pvals_across_tissues <- function(input_files, method_name="SPOT_p", FDRsignif=FALSE){
+    combined_res <- rbindlist(bplapply(input_files, function(in_file, method_name, FDRsignif=FALSE){
     # SPOT results
     spot_res <- fread(in_file)
     t <- basename(dirname(in_file))
+    
+    if(isTRUE(FDRsignif)){
+        spot_res[gene_fdr > snakemake@config$fdrCutoff, gene_p := NA] # only consider FDR significant results
+    }
+    
     spot_res <- spot_res[, .(SAMPLE_ID, GENE_ID, gene_p)]
     setnames(spot_res, "SAMPLE_ID", "sampleID")
     setnames(spot_res, "GENE_ID", "geneID")
@@ -42,6 +49,16 @@ all_res <- rbindlist(bplapply(snakemake@input$SPOT_p, function(in_file, method_n
     spot_res <- spot_res[geneID != "",]
     return(spot_res)
     
-}, method_name="SPOT_p"))
+    }, method_name=method_name, FDRsignif=FDRsignif))
+    return(combined_res)
+}
+
+#+ read and save combined pvals (SPOT)
+all_res <- combine_pvals_across_tissues(input_files=snakemake@input$SPOT_p, method_name="SPOT_p", FDRsignif=FALSE)
 saveRDS(all_res, file=snakemake@output$spot_all_rds)
+
+
+#+ read and save combined pvals (SPOT FDR signficant)
+all_res_fdrSignif <- combine_pvals_across_tissues(input_files=snakemake@input$SPOT_p, method_name="SPOT_p", FDRsignif=TRUE)
+saveRDS(all_res_fdrSignif, file=snakemake@output$spot_all_fdrSignif_rds)
 

@@ -16,10 +16,6 @@
 #'   type: script
 #'---
 
-# #'     - f1_res_table: '/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/Skin_-_Not_Sun_Exposed_Suprapubic/results_per_junction.tsv'
-# #'     - f1_fds: '/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic--gencode34/fds-object.RDS'
-# #'     - f2_fds : '`sm config["DATADIR"] + "/GTEx_v8/fds/minK20_25_minN10/PCA__pc0.1/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic__optQ__newFilt/fds-object.RDS"`'
-
 # # bash command for creating pysashimi plot
 # cd Projects/external_tools/pysashimi/
 # conda activate pysashimi_is
@@ -36,33 +32,17 @@ saveRDS(snakemake, snakemake@log$snakemake)
 
 #+ echo=FALSE
 library(data.table)
-# .libPaths("~/R/4.1/FRASER2")
-# library(FRASER)
 library(ggplot2)
 library(ggpubr)
-# library(gridExtra)
 library(cowplot)
 source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- 14 # snakemake@config$font_size
-# font <- snakemake@config$font
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 point_size <- 0.5
-
-
-# #+ variant enrichment comparison to FRASER1
-# var_enrich_comp_plot <- readRDS(snakemake@input$variant_enrich_comparison[1])
-# maxRank <- 100000
-# g_var_enrich <- var_enrich_comp_plot[[paste0('recall_n=', maxRank)]] +
-#     labs(title="", y="Recall of rare splice-disrupting\ncandidate variants", x="Top N outliers")+ 
-#     # geom_line(size=1.5) +
-#     theme_pubr() + 
-#     theme(legend.position="right", 
-#           legend.title=element_text(size=font_size),
-#           legend.text=element_text(size=font_size-2),
-#           axis.title=element_text(face="bold")) #, size=14))
 
 #+ var recall for all variant sets
 var_recall_all_VEP <- readRDS(snakemake@input$variant_enrich_comparison[[1]])
@@ -114,50 +94,8 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     cowplot::background_grid(major="xy", minor="xy") +
     theme(
-        plot.margin=unit(c(0,1,0.25,0.25), units="cm")
+        plot.margin=unit(c(0,1,0.25,0.25), units="cm") 
     ) 
-
-# #+ motivation example
-# res_f1 <- fread(snakemake@input$f1_res_table)
-# example <- res_f1[sampleID == "GTEX-1117F-2926-SM-5GZYI" & seqnames == "chr12" & hgncSymbol == "KRT1" & start == 52677481 & end == 52677645]
-# fds_f1 <- loadFraserDataSet(file=snakemake@input$f1_fds)
-# idx <- FRASER:::getIndexFromResultTable(fds_f1, example)
-# psi5_vals <- assay(fds_f1, "psi5")[idx,example$sampleID]
-# delta_psi5_vals <- deltaPsiValue(fds_f1, type="psi5")[idx,example$sampleID]
-# psi3_vals <- assay(fds_f1, "psi3")[idx,example$sampleID]
-# delta_psi3_vals <- deltaPsiValue(fds_f1, type="psi3")[idx,example$sampleID]
-# # pred_psi_vals <- predictedMeans(fds_f1, type=example$type)[idx,example$sampleID]
-# 
-# fds_f2 <- loadFraserDataSet(file="/s/project/fraser/fraser2/GTEx_v8/fds/minK20_25_minN10/PCA__pc0.1/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic__optQ__newFilt/fds-object.RDS")
-# idx_f2 <- FRASER:::getIndexFromResultTable(fds_f2, example)
-# jacc_vals <- assay(fds_f2, 'jaccard')[idx_f2,example$sampleID]
-# delta_jacc_vals <- deltaPsiValue(fds_f2, type='jaccard')[idx_f2,example$sampleID]
-# # pred_jacc_vals <- predictedMeans(fds_f2, type='jaccard')[idx_f2,example$sampleID]
-# 
-# dt <- data.table(metric=c("psi5", "psi3"), observed=c(psi5_vals, psi3_vals), delta=c(delta_psi5_vals, delta_psi3_vals))
-# dt <- rbind(dt, data.table(metric="Intron~Jaccard~Index", observed=jacc_vals, delta=delta_jacc_vals))
-# dt <- melt(dt, id.vars="metric")
-# psi5_label <- FRASER:::ggplotLabelPsi("psi5", asCharacter = TRUE)[[1]]
-# psi3_label <- FRASER:::ggplotLabelPsi("psi3", asCharacter = TRUE)[[1]]
-# dt[metric == "psi5", metric := psi5_label]
-# dt[metric == "psi3", metric := psi3_label]
-# dt[, metric := factor(metric, levels=c(psi5_label, "Intron~Jaccard~Index", psi3_label))]
-# setnames(dt, "metric", "Splice metric")
-# 
-# # g_bar_example <- ggbarplot(dt, x="variable", y="value", fill="Splice metric", 
-# #                            position=position_dodge(0.7)) +
-# #     scale_y_continuous(limits=c(0, 1)) + 
-# #     scale_fill_brewer(palette="Paired", labels=c(expression(psi[5]), "Intron Jaccard Index")) +
-# #     labs(y="", x="") 
-# g_bar_example <- ggbarplot(dt, x="variable", y="value", fill="Splice metric", 
-#                            position=position_dodge(0.7)) +
-#     facet_wrap(~`Splice metric`, labeller=label_parsed) +
-#     geom_hline(yintercept=0.3, color="black", linetype="dotted") +
-#     scale_y_continuous(limits=c(0, 1)) + 
-#     scale_fill_manual(values=c("firebrick3", "darkorchid4", "dodgerblue3")) +
-#     labs(y="", x="") +
-#     theme(legend.position="none")
-# g_bar_example
 
 #+ save figure as png and pdf
 ggsave(plot=g_var_rank_rec, filename=snakemake@output$outSvg, width=1.33*page_width, height=page_width, unit=width_unit, dpi=350)

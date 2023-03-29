@@ -20,8 +20,6 @@
 saveRDS(snakemake, snakemake@log$snakemake)
 
 #+ echo=FALSE
-# .libPaths("~/R/4.1/FRASER2")
-# library(FRASER)
 library(data.table)
 library(BiocParallel)
 register(MulticoreParam(snakemake@threads))

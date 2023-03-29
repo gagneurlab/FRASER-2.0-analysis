@@ -3,7 +3,7 @@
 #' author: Ines Scheller
 #' wb:
 #'   log:
-#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figS9.Rds"`'
+#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figSx_power_analysis.Rds"`'
 #'   threads: 1
 #'   resources:
 #'     - mem_mb: 24000
@@ -13,13 +13,11 @@
 #'     - power_analysis_gtex: '`sm config["DATADIR"] + "/power_analysis/GTEx_v8/processed_results/aberrant_splicing/combined_results.tsv"`'
 #'     - patho_sample_anno: '`sm config["mito_sample_anno"]`'
 #'   output:
-#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigS9.png"`'
-#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigS9.pdf"`'
+#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_power_analysis.png"`'
+#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_power_analysis.pdf"`'
 #'   type: script
 #'---
 
-# #'     - power_analysis_omimRv_res_all: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_OMIM_RV.tsv"`'
-# #'     - power_analysis_omimRv_res_patho: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/patho_results_OMIM_RV.tsv"`'
 saveRDS(snakemake, snakemake@log$snakemake)
 
 #+ echo=FALSE
@@ -28,9 +26,11 @@ library(ggpubr)
 library(cowplot)
 library(ggbeeswarm) 
 library(data.table)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- snakemake@config$font_size
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 
@@ -59,10 +59,8 @@ gpval <- ggplot(res_tps, aes(as.factor(size), -log10(pValue))) +
         y = expression(bold(-log[10](italic(P)~"value"))), 
         x = 'Sample size', 
         col = 'Gene') + 
-    theme_pubr() +
-    theme(legend.position = "bottom",
-          axis.title=element_text(face="bold"),
-          text=element_text(size=font_size)) + 
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    theme(legend.position = "bottom") + 
     cowplot::background_grid(major="xy", minor="xy") +
     guides(col=guide_legend(nrow=3)) 
 # gpval
@@ -75,23 +73,18 @@ gdelta <- ggplot(res_tps, aes(size, abs(deltaPsi))) +
         y = expression(bquote(Delta(Intron~Jaccard~Index))),
         x = 'Sample size',
         col = 'Gene') +
-    theme_pubr() +
-    theme(legend.position = "bottom",
-          axis.title=element_text(face="bold"),
-          text=element_text(size=font_size)) +
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    theme(legend.position = "bottom") +
     cowplot::background_grid(major="xy", minor="xy")
 gdelta <- ggplot(res_tps[, median(deltaPsi), by="tmp,size"], aes(size, V1, col=tmp)) + 
     geom_line() +
     geom_point(data=res_tps, aes(size, deltaPsi, col=tmp), size=0.5) +
     labs(
-        # y = expression(paste("|", Delta, "(Intron Jaccard Index)", "|")),
         y = expression(paste(Delta, "(Intron Jaccard Index)")),
         x = 'Sample size',
         col = '') +
-    theme_pubr() +
-    theme(legend.position = "bottom",
-        axis.title=element_text(face="bold"),
-        text=element_text(size=font_size)) +
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    theme(legend.position = "bottom") +
     cowplot::background_grid(major="xy", minor="xy")
 # gdelta
 # plot # of outliers
@@ -102,9 +95,7 @@ gtotal <- ggplot(res_all[padjustGene <= 0.1, .N, by=.(size=factor(size), sim, sa
     labs(
         x = 'Sample size', 
         y = 'Median of splicing\noutliers per sample') +
-    theme_pubr() +
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size)) + 
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
     cowplot::background_grid(major="y", minor="y")
 gtotal
 
@@ -127,9 +118,7 @@ gtotal_gtex <- ggplot(res_gtex_plot, aes(size, med, col=dJ)) +
         x = 'Sample size', 
         y = 'Median of splicing\noutliers per sample') +
     guides(color=guide_legend(title=bquote(Delta~J))) +
-    theme_pubr() +
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size)) + 
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
     cowplot::background_grid(major="y", minor="y")
 # gtotal_gtex
 
@@ -140,10 +129,11 @@ gg <- ggarrange(
                 nrow=1, ncol=2,
                 widths=c(3,4),
                 labels=LETTERS[1:2],
+                font.label=list(size=12, color = "black", face = "bold", family = font),
                 common.legend=TRUE, legend = "bottom"
             )
 # gg
 
 #+ save figure as png and pdf
 ggsave(plot=gg, filename=snakemake@output$outPng, width=page_width, height=0.4*page_width, unit=width_unit, dpi=300) 
-ggsave(plot=gg, filename=snakemake@output$outPdf, width=page_width, height=0.4*page_width, unit=width_unit, dpi=300) 
+ggsave(plot=gg, filename=snakemake@output$outPdf, width=page_width, height=0.4*page_width, unit=width_unit)

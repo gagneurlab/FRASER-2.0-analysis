@@ -24,8 +24,7 @@ library(ggplot2)
 library(ggpubr)
 library(cowplot)
 library(data.table)
-# library(gridExtra)
-source("src/R/ggplot_theme_for_manuscript.R")
+source("src/R/ggplot_theme_for_manuscript.R") 
 
 # library(extrafont)
 # font_import(prompt=FALSE)
@@ -45,36 +44,30 @@ seq_depth_cor_tissue_plot <- readRDS(snakemake@input$seq_depth_cor_tissue)
 seq_depth_dt <- seq_depth_cor_tissue_plot$data
 seq_depth_dt[method == "FRASER2", method := "FRASER 2.0"]
 seq_depth_dt[, method := factor(method, levels=c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0"))]
+seq_depth_dt[, cor_coef := round(cor(record_count, nr_outliers, method="spearman"), digits=2), by="method"]
 seq_depth_cor_tissue_plot <- ggscatter(seq_depth_dt, 
                                        x="record_count", y="nr_outliers_plus_one", 
                                        size=point_size,
                                        add="reg.line", 
                                        conf.int=TRUE, 
                                        add.params=list(color="blue", fill="lightgray"), 
-                                       cor.coef=TRUE, 
+                                       cor.coef=FALSE, # TRUE
                                        cor.method="spearman",
                                        cor.coef.size=3) + 
-    # facet_wrap(~ method, scales="free_y") +
     facet_wrap(~ method, nrow=2) +
+    geom_text(data=seq_depth_dt[, .(record_count=2.25*1e8, 
+                                    nr_outliers_plus_one = 6500, 
+                                    cor_coef = paste0("rho == ", unique(cor_coef)) ), by="method"], 
+              mapping=aes(label=cor_coef), parse=TRUE, size = font_size/.pt) +
     scale_y_log10(limits=c(1, 10000)) + 
     labs(x="Mapped reads", y="Splicing outliers + 1") + 
-    # seq_depth_cor_tissue_plot <- seq_depth_cor_tissue_plot + 
     scale_x_continuous(breaks=c(7.5e7, 1.5e8, 2.25e8), labels=scientific_10(c(7.5e7, 1.5e8, 2.25e8))) +
     # annotation_logticks(sides="l") +
-    # labs(x="Mapped reads") +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     cowplot::background_grid(major="xy", minor="xy")
-# seq_depth_cor_tissue_plot$layers[[1]]$aes_params$size <- point_size
 seq_depth_cor_tissue_plot
 
 seq_depth_cor_all_plot <- readRDS(snakemake@input$seq_depth_cor_all)
-# seq_depth_cor_all_plot <- seq_depth_cor_all_plot +
-#     labs(x="Correlation coefficent\nFRASER", y="Correlation coefficient\nFRASER 2.0") +
-#     theme_pubr() +
-#     theme(axis.title=element_text(face="bold"),
-#           text=element_text(size=font_size)) +
-#     cowplot::background_grid(major="xy", minor="xy")
-# seq_depth_cor_all_plot$layers[[1]]$aes_params$size <- point_size
 cor_all_dt <- seq_depth_cor_all_plot$data
 cor_all_melt <- melt(cor_all_dt, id.vars="tissue", value.name="cor_coef", variable.name="method")
 cor_all_melt[method == "FRASER2", method := "FRASER 2.0"]
@@ -87,9 +80,10 @@ seq_depth_cor_all_plot <- ggplot(cor_all_melt[tissue != "Minor_Salivary_Gland"],
                        paired=TRUE,
                        comparisons=list( c("FRASER 2.0", "LeafcutterMD"), c("FRASER 2.0", "SPOT"), c("FRASER 2.0", "FRASER") ),
                        step.increase=0.2, 
-                       vjust=-0.1
+                       vjust=-0.1,
+                       size = font_size/.pt
                        ) +
-    labs(x="", y="Correlation coefficent (R)") +
+    labs(x="", y="Spearman correlation\ncoefficent") +
     ylim(-0.5,1.5) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     theme(legend.position="none") + 
@@ -97,32 +91,14 @@ seq_depth_cor_all_plot <- ggplot(cor_all_melt[tissue != "Minor_Salivary_Gland"],
 seq_depth_cor_all_plot
 
 #+ combine panels into figure, width=12, height=20
-# row1 <- ggarrange(
-#                 seq_depth_cor_tissue_plot,
-#                   labels=LETTERS[1],
-#                   nrow=1, ncol=1,
-#                   # widths=c(3,1),
-#                   align="hv")
-# row2 <- ggarrange(nr_outliers_per_sample_plot, 
-#                   labels=LETTERS[2], 
-#                   nrow=1, ncol=1)
-row2 <- ggarrange(seq_depth_cor_tissue_plot,
+gg_figure <- ggarrange(seq_depth_cor_tissue_plot,
                   seq_depth_cor_all_plot,
                   labels=LETTERS[1:2],
                   font.label = list(size = 12, color = "black", face = "bold"),
                   align="hv",
                   nrow=2, ncol=1,
                   heights=c(1.75,1)
-                  # widths=c(2,1)
                   )
-gg_figure <- row2
-# gg_figure <- ggarrange(row1, row2, nrow=2)
-# gg_figure <- ggarrange(
-#     row1,
-#     row2, 
-#     nrow=2, ncol=1,
-#     align="hv", 
-#     heights=c(1,1))
 gg_figure
 
 #+ save figure as png and pdf

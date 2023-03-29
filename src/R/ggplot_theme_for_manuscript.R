@@ -11,13 +11,15 @@ theme_manuscript <- function(fig_font="Arial", fig_font_size=8){
             panel.grid.minor = element_blank(),    #strip minor gridlines
             # axis.ticks = element_blank(),          #strip axis ticks
             
-            #since theme_minimal() already strips axis lines, 
-            #we don't need to do that again
-            
             #text elements
             text = element_text(          
                 family = font,            
                 size = fig_font_size),
+            
+            # facet labels
+            strip.text.x = element_text(size=fig_font_size),
+            strip.text.y = element_text(size=fig_font_size,
+                                        angle=270),
             
             # axis labels
             axis.title=element_text(face="bold"), 

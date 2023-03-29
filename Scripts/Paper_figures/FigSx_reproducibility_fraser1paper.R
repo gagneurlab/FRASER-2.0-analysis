@@ -3,7 +3,7 @@
 #' author: Christian Mertes
 #' wb:
 #'  log:
-#'   - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/FigSx_reproducibility_fraser1paper.Rds"`' 
+#'   - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/FigSx_reproducibility.Rds"`' 
 #'  threads: 10
 #'  resources:
 #'   - mem_mb: 64000
@@ -11,8 +11,8 @@
 #'   - data:   '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSplicing__0.0_reproducibility.RDS"`'
 #'   - table:  '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSplicing__0.0_reproducibility.tsv.gz"`'
 #'  output:
-#'   - outPng: '`sm config["PAPER_FIGDIR"] + "/FigureSx_outlier_call_reproducibility.png"`'
-#'   - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigureSx_outlier_call_reproducibility.pdf"`'
+#'   - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_reproducibility.png"`'
+#'   - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_reproducibility.pdf"`'
 #' output:
 #'  html_document
 #'---
@@ -27,7 +27,13 @@ library(data.table)
 library(ggplot2)
 library(cowplot)
 library(ggpubr)
+source("src/R/ggplot_theme_for_manuscript.R")
 
+#+ read in figure font size and width params from config
+font_size <- snakemake@config$font_size
+font <- snakemake@config$font
+page_width <- snakemake@config$page_width
+width_unit <- snakemake@config$width_unit
 
 #+ input
 data_file  <- snakemake@input$data
@@ -58,14 +64,6 @@ attach(data$datatables)
 renameTheMethod <- function(dt){
     dt[, Method := gsub("_p", "", Method)]
     dt[, Method := factor(Method, levels=c("LeafcutterMD", "SPOT", "FRASER", "FRASER2"))]
-    # dt[, Method := factor(Method, levels=c("FRASER", "FRASER2", "LeafcutterMD", "SPOT"))]
-    # if(is.factor(dt$Method) && grepl("FRASER", levels(dt$Method))){
-    #     return(dt)
-    # }
-    # dt[,Method:=factor(Method, levels=c("PCA_p", "BB_p", "LeafcutterMD_p", "SPOT_p"))]
-    # dt <- dt[!is.na(Method)]
-    # levels(dt$Method) <- mName4Plot(levels(dt$Method), removeTest=TRUE, AE_Name=AE_NAME)
-    # dt
 }
 dt2p <- renameTheMethod(dt2p)
 dt2p5p <- renameTheMethod(dt2p5p)
@@ -78,12 +76,11 @@ dt2p9p <- renameTheMethod(dt2p9p)
 #'
 gt1 <- ggplot(res[,.(Method, totalTested)], aes(totalTested, fill=Method)) + 
     geom_histogram(position="dodge") + 
-    # scale_fill_brewer(palette="Dark2") +
     scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
     ylab("Number of tested events") + 
     xlab(bquote("Number of tissues event is tested")) + 
-    theme_bw() + 
-    grids() + 
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    grids(axis="y") + 
     scale_y_log10()
 gt1
 
@@ -94,11 +91,11 @@ plotTotalNumberOfEvents <- function(dt, value){
         geom_bar(position="dodge") + 
         theme_bw() + 
         facet_wrap(~spliceVariant) + 
-        # scale_fill_brewer(palette="Dark2") + 
         scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
         ylab("Number of events") + 
         xlab(bquote("Number of tissues outlier is present (" ~ italic(P) < 10^-.(value) ~ ")")) + 
-        grids() + 
+        theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+        grids(axis="y") + 
         scale_y_log10()
 }
 
@@ -117,11 +114,11 @@ plotTotalNumberOfEventsByCategory <- function(dt, value){
         geom_bar(position="dodge", stat="identity") + 
         theme_bw() + 
         facet_wrap(~spliceVariant) + 
-        # scale_fill_brewer(palette="Dark2") + 
         scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
         ylab("Number of events") + 
         xlab(bquote("Number of tissues outlier is present (" ~ italic(P) < 10^-.(value) ~ ")")) + 
-        grids() + 
+        theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+        grids(axis="y") + 
         scale_y_log10()
 }
 
@@ -147,10 +144,9 @@ plotPercentage <- function(dt, value){
         geom_bar(stat="identity", position="dodge") + 
         labs(x=bquote("Number of tissues outlier is present (" ~ italic(P) < 10^-.(value) ~ ")"),
              y="Percentage\nwithin Method") + 
-        # scale_fill_brewer(palette="Dark2") + 
         scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
-        theme_bw() + 
-        grids()
+        theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+        grids(axis="y")
 }
 
 plotPercentageByCategory <- function(dt, value){
@@ -167,10 +163,9 @@ plotPercentageByCategory <- function(dt, value){
         geom_bar(stat="identity", position="dodge") + 
         labs(x=bquote("Number of tissues outlier is present (" ~ italic(P) < 10^-.(value) ~ ")"),
              y="Percentage\nwithin Method") + 
-        # scale_fill_brewer(palette="Dark2") + 
         scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4")) +
-        theme_bw() + 
-        grids()
+        theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+        grids(axis="y")
 }
 
 gg9p <- plotPercentage(dt2p9p, "9")
@@ -191,6 +186,7 @@ gg5p
 #' Arrange the plots
 #'
 g <- ggarrange(labels=LETTERS[1:4], ncol=1, common.legend=TRUE, legend="bottom",
+               font.label=list(size=12, color = "black", face = "bold", family = font),
                g1,
                # g3,
                gg5p,
@@ -202,5 +198,5 @@ g
 #+ save figure
 factor <- 0.65
 outPng
-ggsave(outPng, g, width = 13*factor, height = 17*factor)
-ggsave(outPdf, g, width = 13*factor, height = 17*factor)
+ggsave(plot=g, filename=outPng, width=page_width, height=1.3*page_width, unit=width_unit, dpi=300)
+ggsave(plot=g, filename=outPdf, width=page_width, height=1.3*page_width, unit=width_unit)

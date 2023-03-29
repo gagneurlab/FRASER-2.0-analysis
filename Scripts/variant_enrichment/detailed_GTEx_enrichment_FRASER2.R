@@ -21,12 +21,7 @@
 #'   html_document
 #'---
 
-# #'     - goodness_of_fit: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER2_goodnessOfFit_recall_at_x_outliers_{snptype}.Rds", dataset=config["tissues_for_reproducibility"], snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice"])`'
-
-# #'     - bestQ_PCA: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/minK20_95_minN1/PCA__pc01/jaccard/0.3__5__0.1__FALSE/all_q_enrichment_plots_{snptype}.Rds", dataset=config["tissues_for_reproducibility"], snptype=["rareSplicing", "rareMMSplice", "rareSpliceAI"])`'
-# #'     - bestQ_BB: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/minK20_95_minN1/PCA-BB-Decoder/jaccard/0.3__5__0.1/all_q_enrichment_plots_{snptype}.Rds", dataset=config["tissues_for_reproducibility"], snptype=["rareSplicing", "rareMMSplice", "rareSpliceAI"])`'
-# , "rareIntronic"
-# #'     - all_done: '`sm config["htmlOutputPath"] + "/GTEx_v8/variant_enrichment/detailed_FRASER2_enrichment_investigation.done"`'
+# tissues_for_reproducibility
 
 saveRDS(snakemake, snakemake@log$snakemake)
 
@@ -329,11 +324,24 @@ g_filter_delta0.1_spliceAI <- ggplot(filtering_dt[snptype == "rare SpliceAI" & d
           strip.text = element_text(size = font_size))
 g_filter_delta0.1_spliceAI
 
+#+ filtering_delta0.1_rareAbSplice, fig.width=15, fig.height=5
+g_filter_delta0.1_AbSplice <- ggplot(filtering_dt[snptype == "rare AbSplice" & delta == 0.1 & k == 20,], aes(n, recall, fill=n)) +
+    facet_grid( ~ q, labeller=label_both) +
+    geom_boxplot() +
+    labs(x="Minimal N in at least q% samples", y=paste0("Recall at ", recall_at, " outliers/sample")) + 
+    scale_fill_brewer(palette="Purples") + 
+    guides(fill="none") +
+    theme_bw() +
+    theme(axis.title=element_text(size=font_size), axis.text=element_text(size=font_size),
+          strip.text = element_text(size = font_size))
+g_filter_delta0.1_AbSplice
+
 ggplots[["filter_opt_fixed_delta0.3"]] <- g_filter_delta0.3
 ggplots[["filter_opt_fixed_delta0.2"]] <- g_filter_delta0.2
 ggplots[["filter_opt_fixed_delta0.3+spliceAIvars"]] <- g_filter_delta0.3_spliceAI
 ggplots[["filter_opt_fixed_delta0.2+spliceAIvars"]] <- g_filter_delta0.2_spliceAI
 ggplots[["filter_opt_fixed_delta0.1+spliceAIvars"]] <- g_filter_delta0.1_spliceAI
+ggplots[["filter_opt_fixed_delta0.1+AbSplicevars"]] <- g_filter_delta0.1_AbSplice
 ggplots[["joined_delta_filter_opt"]] <- g_joined_delta_filter
 ggplots[["joined_delta_filter_opt_spliceAIvars"]] <- g_joined_delta_filter_spliceAI
 ggplots[["joined_filter_delta_opt_spliceAIvars"]] <- g_joined_filter_delta_spliceAI

@@ -3,15 +3,15 @@
 #' author: Ines Scheller
 #' wb:
 #'   log:
-#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figS5.Rds"`'
+#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figSx_qqplots.Rds"`'
 #'   threads: 1
 #'   resources:
 #'     - mem_mb: 12000
 #'   input:
 #'     - global_qq: '`sm expand(config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/optQ/PCA__pc0.1/{dataset}/global_qqPlots.Rds", dataset=config["tissues_for_detailed_analysis"])`'
 #'   output:
-#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigS5.png"`'
-#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigS5.pdf"`'
+#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_qqplots.png"`'
+#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_qqplots.pdf"`'
 #'   type: script
 #'---
 
@@ -21,9 +21,11 @@ saveRDS(snakemake, snakemake@log$snakemake)
 library(ggplot2)
 library(ggpubr)
 library(cowplot)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- snakemake@config$font_size
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 point_size <- 0.5
@@ -59,11 +61,9 @@ gg_ls <- lapply(sort(sample(input_files, 15)), FUN=function(qq_plot_rds){
             y = expression(bold(-log[10]("observed"~"P")))
         ) + 
         guides(col = guide_legend(nrow = 1, title="")) +
-        theme_pubr() +
-        theme(axis.title=element_text(face="bold"), 
-              legend.position="top",
+        theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+        theme(legend.position="top",
               title=element_text(face="bold"),
-              text=element_text(size=font_size),
               axis.text=element_text(size=10),
               legend.text=element_text(size=10)) +
         cowplot::background_grid(major="xy", minor="xy")

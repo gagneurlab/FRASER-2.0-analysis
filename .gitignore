@@ -25,4 +25,4 @@ logs/
 src/R/misc
 
 # ignore Output folder
-Output/
+Output

@@ -39,7 +39,7 @@ blacklist_genes <- gene_anno[to(gene_hits), gene_name]
 combine_pvals_across_tissues <- function(input_files, method_name, removeBlacklist=FALSE){
     combined_res <- rbindlist(bplapply(input_files, function(in_file, method_name, removeBlacklist){
         pval_mat <- fread(in_file)
-        if(method_name == "FRASER2"){
+        if(grepl("FRASER2", method_name)){
             t <- basename(dirname(dirname(dirname(dirname(dirname((in_file)))))))
         } else{
             t <- basename(dirname(dirname(dirname(dirname((in_file))))))

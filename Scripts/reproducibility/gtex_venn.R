@@ -35,7 +35,7 @@ outliers_f2_all <- unlist(bplapply(snakemake@input$res_fraser2,
 outliers_f1_all <- unlist(bplapply(snakemake@input$res_fraser1,
                           FUN=function(file){
                               tissue <- basename(dirname(file))
-                              tissue <- gsub("__old_filter", "", tissue)
+                              tissue <- gsub("(_)+old_filter", "", tissue)
                               res <- fread(file)
                               res[, sampleGene := paste(sampleID, hgncSymbol, tissue, sep="_#_")]
                               return(res[!duplicated(sampleGene),sampleGene])

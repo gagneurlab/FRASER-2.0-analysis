@@ -12,7 +12,7 @@ figdir: '/s/project/fraser/fraser2/figures'
 
 # paper figure params:
 font_size: 8 
-font: "sans" # "Arial"
+font: "Helvetica" # "Arial"
 page_width: 178
 width_unit: "mm"
 

@@ -27,7 +27,6 @@ saveRDS(snakemake, snakemake@log$snakemake)
 library(ggplot2)
 library(ggpubr)
 library(cowplot)
-# library(ggvenn)
 library(ggupset)
 library(ggbeeswarm)
 library(data.table)
@@ -49,8 +48,8 @@ udn_plots <- readRDS(snakemake@input$udn_nr_outliers_comparison)
 
 # boxplot of number of outliers in different cohorts
 mito_dt <- fdr_comparison_plots[["boxplots_numOut_gene"]]$data
-mito_dt[, dataset_group:="Mitochondrial disease cohort"]
-mito_dt[, dataset_label:=paste0("Fibroblasts (N=", uniqueN(sampleID),")")]
+mito_dt[, dataset_group:="Yépez et al. dataset"] # "Mitochondrial disease cohort"]
+mito_dt[, dataset_label:="Fibroblasts"]
 mito_dt
 mito_dt_omim <- fread(snakemake@input$prokisch_omim_res_table)
 mito_dt_omim <- mito_dt_omim[!duplicated(mito_dt_omim, by=c("sampleID","seqnames","start","end","strand")), ]
@@ -58,8 +57,8 @@ mito_dt_omim <- mito_dt_omim[!duplicated(mito_dt_omim, by=c("sampleID","seqnames
 mito_dt_omim[, numOutliersPerSample := uniqueN(hgncSymbol), by = "sampleID"]
 mito_dt_omim[, numSamplesPerGene := uniqueN(sampleID), by = hgncSymbol]
 # add name of dataset
-mito_dt_omim[, dataset_group:="Mitochondrial disease cohort"]
-mito_dt_omim[, dataset_label:=paste0("Fibroblasts (N=", uniqueN(mito_dt$sampleID),")")]
+mito_dt_omim[, dataset_group:="Yépez et al. dataset"] # "Mitochondrial disease cohort"]
+mito_dt_omim[, dataset_label:="Fibroblasts"]
 mito_dt_omim[, method:="FRASER2 (OMIM)"]
 mito_dt_omim <- mito_dt_omim[, .(num_out = unique(numOutliersPerSample)), by="sampleID,method,dataset_label,dataset_group"]
 mito_dt_omim
@@ -68,37 +67,37 @@ mito_dt <- rbind(mito_dt, mito_dt_omim)
 dcast_dt <- dcast(mito_dt, sampleID + dataset_label + dataset_group ~ method, value.var="num_out")
 dcast_dt[is.na(`FRASER2 (OMIM)`), `FRASER2 (OMIM)` := 0]
 mito_dt <- melt(dcast_dt, id.vars=c("sampleID", "dataset_label","dataset_group"), value.name="num_out", variable.name="method")
+mito_dt
 
 udn_dt <- udn_plots[["boxplots_numOut_gene"]]$data
 udn_dt[, dataset_group := "Undiagnosed Disease Network (UDN)"]
+udn_dt[, dataset_label := NULL]
+setnames(udn_dt, "dataset_name", "dataset_label")
 
 num_out_dt <- rbind(mito_dt[,.(sampleID, dataset_label, dataset_group, method, num_out)], 
                     udn_dt[,.(sampleID, dataset_label, dataset_group, method, num_out)])
-tissue_order <- num_out_dt[,median(num_out),by="dataset_label,method"][method == "FRASER"][order(-V1), dataset_label]
+tissue_order <- num_out_dt[dataset_group == "Undiagnosed Disease Network (UDN)", median(num_out),by="dataset_label,method"][method == "FRASER"][order(-V1), dataset_label]
 num_out_dt[, dataset_label := factor(dataset_label, levels=tissue_order)]
 num_out_dt[method == "FRASER2", method := "FRASER 2.0"]
 num_out_dt[method == "FRASER2 (OMIM)", method := "FRASER 2.0\n(OMIM)"]
 num_out_dt[method == "FRASER2\n(OMIM + RV)", method := "FRASER 2.0\n(OMIM + RV)"]
 num_out_dt[, method := factor(method, levels=c("FRASER", "FRASER 2.0", "FRASER 2.0\n(OMIM)", "FRASER 2.0\n(OMIM + RV)"))]
-
-# fc_dt <- dcast(num_out_dt, dataset_label + dataset_group ~ method, value.var="num_out", fun.aggregate=function(x) as.numeric(median(x)))[,fc := FRASER / `FRASER 2.0`]
-# fc_dt
+num_out_dt[, dataset_group := factor(dataset_group, levels=c("Undiagnosed Disease Network (UDN)", "Yépez et al. dataset"))]
 
 g_boxplot_all <- ggplot(num_out_dt, aes(dataset_label, num_out+1, col=method)) +
     facet_grid(~dataset_group, scales="free_x", space="free_x") +
-    # geom_violin() +
-    # geom_boxplot(width=0.25, alpha=0.2, outlier.size=point_size) +
     geom_boxplot(outlier.size=point_size) +
     labs(x="", y="Splicing outliers\nper sample + 1") +
     scale_y_log10() +
     scale_color_manual(values=c("dodgerblue3", "purple4", "purple1", "violetred")) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     theme(legend.title = element_blank()) +
-    cowplot::background_grid(major="y", minor="y")
+    cowplot::background_grid(major="y", minor="y") #+
+    # annotate("segment", x=0, xend=0, y=0, yend=Inf, linewidth = 1) # add y axis line so that logticks dont look weird in middle facets
 a <- annotation_logticks(sides='l')
-a$data <- data.frame(x=NA, dataset_group="Mitochondrial disease cohort") # have logticks only on left facet
+a$data <- data.frame(x=NA, dataset_group=levels(num_out_dt[, dataset_group])[1]) # have logticks only on left facet (changes facet order :( ))
 g_boxplot_all <- g_boxplot_all + a
-# g_boxplot_all
+g_boxplot_all
 
 # fdr_comparison_plots <- readRDS(snakemake@input$prokisch_fdr_comparison)
 upset_dt <- fdr_comparison_plots[["gg_upset"]]$data
@@ -156,7 +155,6 @@ upset_plot <- ggplot(upset_dt, aes(x=comb)) +
     labs(x="", y="") +
     geom_text(aes(label = ..count..), stat = 'count', nudge_y = 500, 
               size=font_size/.pt) +
-    # theme(text=element_text(size=font_size)) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     theme_combmatrix(combmatrix.label.text = element_text(size=font_size, 
                                                           family = font)) + 
@@ -172,46 +170,24 @@ patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "C19orf70"]
 patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
 
 # transcriptome-wide results
-res_all <- fread(snakemake@input$power_analysis_full_res_all)
 res_tps <- fread(snakemake@input$power_analysis_full_res_patho)
 # dont show sizes 70 and 90 in final plot
-res_all <- res_all[!size %in% c(70, 90)]
 res_tps <- res_tps[!size %in% c(70, 90)]
 
 # plot proportion of recovered pathogenic cases
 gprop <- ggplot(res_tps[padjustGene <= 0.1, .(Noutliers=.N, prop=.N/length(patho_tmp)), by=.(size, sim, FDR_set)], 
-                aes(as.factor(size), 100*prop)) +
-    geom_beeswarm(groupOnX=TRUE, size=0.75) +  
+                aes(as.factor(size), prop)) +
+    geom_beeswarm(groupOnX=TRUE, size=point_size) +  
     labs(
-        y = paste0('Percentage of recovered\n splicing outliers (n=', length(patho_tmp), ')'),
+        y = paste0('Fraction of recovered\n splicing outliers (n=', length(patho_tmp), ')'),
         x = 'Sample size') +
-    scale_y_continuous(limits=c(0, 100)) +
+    scale_y_continuous(labels=scales::percent, limits=c(0,1)) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     theme(axis.text.x=element_text(angle=45, hjust=1, vjust=0.9)) + 
     cowplot::background_grid(major="xy", minor="xy")
 # gprop
 
 #+ combine panels into figure, width=15, height=12
-# gg_row1 <- ggarrange(
-#     boxplot_prokisch,
-#     upset_plot,
-#     nrow=1, ncol=2,
-#     labels=LETTERS[1:2],
-#     widths=c(1.1,2)
-#     )
-# gg_row2 <- ggarrange(
-#     gprop,
-#     # g_boxplot_udn,
-#     nrow=1, ncol=2,
-#     labels=LETTERS[3],
-#     widths=c(2,1)
-#     )
-# gg_figure <- ggarrange(gg_row1,
-#                        gg_row2,
-#                        # gg_row3,
-#                        nrow=2, ncol=1,
-#                        heights=c(1,1))
-
 gg_row2 <- ggarrange(
     upset_plot,
     gprop,
@@ -229,5 +205,5 @@ gg_figure <- ggarrange(g_boxplot_all,
 gg_figure
 
 #+ save figure as png and pdf
-ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=0.8*page_width, unit=width_unit, dpi=300) 
-ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=0.8*page_width, unit=width_unit, dpi=300) 
+ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=0.8*page_width, unit=width_unit) 
+ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=0.8*page_width, unit=width_unit) 

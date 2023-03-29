@@ -3,17 +3,17 @@
 #' author: Ines Scheller
 #' wb:
 #'   log:
-#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figS3_recallAt{x}.Rds"`'
+#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/figSx_rhoOpt_recallAt{x}.Rds"`'
 #'   threads: 1
 #'   resources:
 #'     - mem_mb: 12000
 #'   input:
 #'     - fraser2_fds_pc01: '`sm config["DATADIR"] + "/GTEx_v8/fds/minK20_5_minN10/PCA__pc0.1/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic__optQ__newFilt/pvaluesBetaBinomial_junction_jaccard.h5"`'
-#'     - pr_curve: '`sm config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER2_goodnessOfFit_rv_recall_plots_rareSpliceAI.Rds"`'
+#'     - pr_curve: '`sm config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER2_goodnessOfFit_rv_recall_plots_rareAbSplice.Rds"`'
 #'     - rho_optimization: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/parameter_optimization_rv_recallAt{x}_ggplots.Rds"`'
 #'   output:
-#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigS3_recallAt{x}.png"`'
-#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigS3_recallAt{x}.pdf"`'
+#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_rhoOpt_recallAt{x}.png"`'
+#'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_rhoOpt_recallAt{x}.pdf"`'
 #'   type: script
 #'---
 
@@ -25,19 +25,23 @@ library(FRASER)
 library(ggplot2)
 library(ggpubr)
 library(cowplot)
-# library(gridExtra)
+source("src/R/ggplot_theme_for_manuscript.R")
 
 #+ read in figure font size and width params from config
 font_size <- snakemake@config$font_size
+font <- snakemake@config$font
 page_width <- snakemake@config$page_width
 width_unit <- snakemake@config$width_unit
 
 #+ read in plots and data for the different panels
-pr_curves <- readRDS(snakemake@input$pr_curve)
+inputfile_pr_curve_rho <- snakemake@input$pr_curve
+pr_curves <- readRDS(inputfile_pr_curve_rho)
 param_optimizations <- readRDS(snakemake@input$rho_optimization)
 
 #+ extract needed plots from input
 maxRank <- 50000
+snptype_rho <- strsplit(gsub(".Rds", "", basename(inputfile_pr_curve_rho)), "_", fixed=TRUE)[[1]][6]
+snptype_rho <- gsub("rare", "", snptype_rho)
 colors_all <- RColorBrewer::brewer.pal(8, "Greens")
 colors_sub <- colors_all[c(2, 5, 8)]
 pr_curve <- pr_curves[[paste0('recall_n=', maxRank)]] + 
@@ -46,18 +50,16 @@ pr_curve <- pr_curves[[paste0('recall_n=', maxRank)]] +
     # scale_x_log10() +
     # scale_x_continuous(labels=scales::scientific, limits=c(0, maxRank)) +
     guides(color=guide_legend(title=expression(rho))) +
-    theme_pubr() + 
+    ggtitle(paste0("Variant annotation tool: ", snptype_rho)) +
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
     theme(legend.position="top", 
-          legend.box="vertical",
-          axis.title=element_text(face="bold"),
-          text=element_text(size=font_size))  + 
+          legend.box="vertical")  + 
     cowplot::background_grid(major="xy", minor="xy")
 rho_optimization <- param_optimizations[["rho_opt_fixed_pc"]] +
     xlab(expression(rho~" cutoff")) +
     # guides(fill=guide_legend(title=expression(rho))) +
-    theme_pubr() + 
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size),
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    theme(
           # axis.text.x=element_text(angle=45, vjust = 1, hjust=1)) + 
           axis.text.x=element_text(angle=90)) + 
     cowplot::background_grid(major="y", minor="y")
@@ -78,10 +80,8 @@ rho_example_predObs <- rho_example_predObs +
         x = "Predicted Intron Jaccard Index",
         y = "Observed Intron Jaccard Index"
     ) +
-    theme_pubr() + 
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size),
-          legend.position="none")
+    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+    theme(legend.position="none")
 
 #+ get ecdf for rho
 rho_vals <- rho(fds, type="jaccard")
@@ -95,9 +95,7 @@ rho_ecdf <- ggplot(data.table(rho=rho_vals), aes(rho)) +
          y = expression("F("~rho~")"), 
          x = expression(rho)) +
     annotation_logticks(sides="b") +
-    theme_pubr() + 
-    theme(axis.title=element_text(face="bold"),
-          text=element_text(size=font_size))
+    theme_manuscript(fig_font_size=font_size, fig_font=font)
 # rho_ecdf
 
 #+ get legend
