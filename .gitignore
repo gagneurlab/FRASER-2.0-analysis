@@ -26,3 +26,7 @@ src/R/misc
 
 # ignore Output folder
 Output
+
+# ignore internal wbuild config yaml
+wbuild_interal.yaml
+
