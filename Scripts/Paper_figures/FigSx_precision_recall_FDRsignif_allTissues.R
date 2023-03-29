@@ -42,14 +42,14 @@ var_recall_all_AbSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[4
 # maxRank <- 5e6
 # maxRankForPlot <- 3e6
 
-recall_rank_dt <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
-                         (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare SpliceAI"],
-                         (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare MMSplice"],
-                         (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare AbSplice"])
-dt4cutoffs <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
-                     (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare SpliceAI"],
-                     (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare MMSplice"],
-                     (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare AbSplice"])
+recall_rank_dt <- rbind( (var_recall_all_VEP$precision_recall$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+                         (var_recall_all_SpliceAI$precision_recall$data)[,snptype := "rare SpliceAI"],
+                         (var_recall_all_MMSplice$precision_recall$data)[,snptype := "rare MMSplice"],
+                         (var_recall_all_AbSplice$precision_recall$data)[,snptype := "rare AbSplice"])
+dt4cutoffs <- rbind( (var_recall_all_VEP$precision_recall$layers[[2]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+                     (var_recall_all_SpliceAI$precision_recall$layers[[2]]$data)[,snptype := "rare SpliceAI"],
+                     (var_recall_all_MMSplice$precision_recall$layers[[2]]$data)[,snptype := "rare MMSplice"],
+                     (var_recall_all_AbSplice$precision_recall$layers[[2]]$data)[,snptype := "rare AbSplice"])
 recall_rank_dt[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
 dt4cutoffs[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
 # var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare AbSplice")
@@ -59,16 +59,16 @@ dt4cutoffs[Method == "FRASER2", Method := "FRASER 2.0"]
 methods_to_show <- c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0")
 recall_rank_dt <- recall_rank_dt[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
 dt4cutoffs <- dt4cutoffs[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
-g_var_prec_rec  <- ggplot(recall_rank_dt[Method != "totalPossibleRank"], 
+g_var_prec_rec  <- ggplot(recall_rank_dt, 
                           aes(x=recall, y=precision, col=Method)) +
     facet_wrap(~snptype) +
     geom_line() +
     geom_point(data=dt4cutoffs, aes(x=recall, y=precision, color=Method, shape=Cutoff), size=3) +
-    labs(title=paste(dataset), 
-         x="Recall of rare splice-disrupting candidate variants", y="Precision") +
+    labs(x="Recall of rare splice-disrupting candidate variants", 
+         y="Precision") +
     grids(color="white") +
     scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4"),
-                       labels=metric_labels) +
+                       labels=methods_to_show) +
     scale_shape_discrete(labels=function(x)parse(text=x)) +
     guides(linetype = "none") + 
     guides(shape=guide_legend(title=ifelse(all(dt4cutoffs[,Type == "FDR"]), "FDR cutoff", "Cutoff"), order = 2),
@@ -78,5 +78,5 @@ g_var_prec_rec  <- ggplot(recall_rank_dt[Method != "totalPossibleRank"],
 g_var_prec_rec
 
 #+ save figure as png and pdf
-ggsave(plot=g_var_prec_rec, filename=snakemake@output$outPng, width=0.75*page_width, height=0.5*page_width, unit=width_unit)
-ggsave(plot=g_var_prec_rec, filename=snakemake@output$outPdf, width=0.75*page_width, height=0.5*page_width, unit=width_unit)
+ggsave(plot=g_var_prec_rec, filename=snakemake@output$outPng, width=page_width, height=page_width, unit=width_unit)
+ggsave(plot=g_var_prec_rec, filename=snakemake@output$outPdf, width=page_width, height=page_width, unit=width_unit)
