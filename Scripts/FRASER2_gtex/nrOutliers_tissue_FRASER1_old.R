@@ -8,9 +8,9 @@
 #'   resources:
 #'     - mem_mb: 15000
 #'   input:
-#'     - fds_fraser: '`sm "/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter/fds-object.RDS"`'
-#'     - res_fraser: '`sm  "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
-#'     - res_fraser_junction: '`sm  "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results_per_junction.tsv"`'
+#'     - fds_fraser: '`sm config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter/fds-object.RDS"`'
+#'     - res_fraser: '`sm  config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
+#'     - res_fraser_junction: '`sm  config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results_per_junction.tsv"`'
 #'   output:
 #'     - nrOutliers_table: '`sm config["DATADIR"] + "/GTEx_v8/{dataset}/minK20_95_minN1/PCA/optQ/FRASER1_nrOutliers.tsv"`'
 #'   type: script

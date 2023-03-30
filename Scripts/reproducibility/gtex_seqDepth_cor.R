@@ -8,9 +8,9 @@
 #'   resources:
 #'    - mem_mb: 32000
 #'   input:
-#'    - bam_coverage_tsv: '`sm expand("/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/outrider/{tissue}/bam_coverage.tsv", tissue=config["tissues_for_reproducibility"])`'
+#'    - bam_coverage_tsv: '`sm expand(config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/outrider/{tissue}/bam_coverage.tsv", tissue=config["tissues_for_reproducibility"])`'
 #'    - res_FRASER2: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_results/minK20_25_minN10/PCA__pc0.1/{dataset}/optQ__newFilt/delta{{delta}}/results_gene.tsv", dataset=config["tissues_for_reproducibility"])`'
-#'    - res_FRASER1: '`sm expand("/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{tissue}_old_filter/results.tsv", tissue=config["tissues_for_reproducibility"])`'
+#'    - res_FRASER1: '`sm expand("config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{tissue}_old_filter/results.tsv", tissue=config["tissues_for_reproducibility"])`'
 #'    - res_SPOT_LeafcutterMD: '`sm expand(config["DATADIR"] + "/GTEx_v8/fraser2_improvements/{tissue}/seq_depth_cor_spot_leafcutterMD.tsv", tissue=config["tissues_for_reproducibility"])`'
 #'   output:
 #'    - wBhtml: '`sm config["htmlOutputPath"] + "/GTEx_v8/FRASER1_vs_FRASER2/gtex_seqDepth_cor_delta{delta}.html"`'
@@ -24,9 +24,6 @@
 #' output:
 #'   html_document
 #'---
-
-# #'    - res_FRASER2_newFilter: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_results/{dataset}/optQ__newFilt/results_gene.tsv", dataset=config["tissues_for_reproducibility"])`'
-# #'    - res_FRASER1_newFilter: '`sm expand("/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode29/fraser/{tissue}_new_filter/results.tsv", tissue=config["tissues_for_reproducibility"])`'
 
 saveRDS(snakemake, snakemake@log$snakemake)
 

@@ -8,10 +8,10 @@
 #'   resources:
 #'     - mem_mb: 24000
 #'   input:
-#'     - res_fraser1: '`sm  "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
+#'     - res_fraser1: '`sm  config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
 #'     - res_fraser2: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_results/minK{k}_{q}_minN{n}/{implementation}/{dataset}/optQ__newFilt/delta{delta}/results_gene.tsv"`'
 #'     - fds_fraser2: '`sm config["DATADIR"] + "/GTEx_v8/fds/minK{k}_{q}_minN{n}/{implementation}/savedObjects/{dataset}__optQ__newFilt/fds-object.RDS"`'
-#'     - fds_fraser1: '`sm  "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter--gencode34/fds-object.RDS"`'
+#'     - fds_fraser1: '`sm  "config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter--gencode34/fds-object.RDS"`'
 #'   output:
 #'     - wBhtml: '`sm config["htmlOutputPath"] + "/GTEx_v8/fraser2_improvements/{dataset}/minK{k}_{q}_minN{n}/{implementation}/delta{delta}/optQ/jaccard_to_psi_comparison.html"`'
 #'     - res_fraser1_anno: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/{dataset}/minK{k}_{q}_minN{n}/{implementation}/delta{delta}/optQ/fraser1_res_with_jaccard.tsv"`'
@@ -34,26 +34,13 @@ register(MulticoreParam(snakemake@threads))
 dataset <- snakemake@wildcards$dataset
 dataset <- gsub("_", " ", gsub("_-_", " ", dataset))
 
-# #+ read in fraser fds
-# fds_f1 <- loadFraserDataSet(file="/s/project/prokisch/processed_data/aberrant_splicing/datasets/savedObjects/raw-fib/fds-object.RDS")
-# dim(fds_f1)
-# psi3 <- assay(fds_f1, "psi3")
-# psi5 <- assay(fds_f1, "psi5")
-# 
-# #+ read in fraser2 fds
-# fds_f2 <- loadFraserDataSet(file="/s/project/fraser/fraser2/processed_data/datasets/savedObjects/raw-fib/fds-object.RDS")
-# dim(fds_f2)
-# jaccard <- assay(fds_f2, "jaccard")
-
 #+ read in fraser results
 res_f1 <- fread(snakemake@input$res_fraser1)
-# res_f1 <- fread("/s/project/prokisch/processed_results/aberrant_splicing/results/gencode34/fraser/fib/results_per_junction.tsv")
 res_f1 <- res_f1[type != "theta", .(sampleID, seqnames, start, end, strand, type, psiValue, deltaPsi)]
 res_f1
 
 #+ read in fraser2 fds
 fds_f2 <- loadFraserDataSet(file=snakemake@input$fds_fraser2)
-# fds_f2 <- loadFraserDataSet(file="/s/project/fraser/fraser2/processed_results/datasets/PCA__pc0.1/savedObjects/fib-minExpr20-quantile0.25-quantCoverage10--gencode34/fds-object.RDS")
 dim(fds_f2)
 jaccard <- assay(fds_f2, "jaccard")
 deltaJaccard <- deltaPsiValue(fds_f2, type="jaccard")
@@ -77,7 +64,6 @@ res_f1
 
 #+ add fraser2 outlier status
 res_f2 <- fread(snakemake@input$res_fraser2)
-# res_f2 <- fread("/s/project/fraser/fraser2/GTEx_v8/FRASER2_results/minK20_25_minN10/PCA__pc0.1/Skin_-_Not_Sun_Exposed_Suprapubic/optQ__newFilt/delta0.1/results_gene.tsv")
 res_f2[, FRASER2_outlier := TRUE]
 res_f2 <- res_f2[,.(sampleID, seqnames, start, end, strand, FRASER2_outlier)]
 res_f1 <- merge(res_f1, res_f2, by=c("sampleID", "seqnames", "start", "end", "strand"), all.x=TRUE)

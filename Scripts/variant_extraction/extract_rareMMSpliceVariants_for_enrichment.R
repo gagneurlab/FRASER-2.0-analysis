@@ -8,7 +8,7 @@
 #'   resources:
 #'     - mem_mb: 15000
 #'   input:
-#'     - variantTable_dir:  "/s/project/absplice/data/results/gtex_v8_with_general_workflow/splicing_predictions/pred_variant_level/mmsplice_baseline"
+#'     - variantTable_dir:  '`sm config["general_data_dir] + "/absplice/data/results/gtex_v8_with_general_workflow/splicing_predictions/pred_variant_level/mmsplice_baseline"`'
 #'   output:
 #'     - variantTable: '`sm expand(config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareMMSplice_filtered_VariantsTable.tsv.gz", dataset_vcf_group=config["vcf_files"].keys())`'
 #' output:

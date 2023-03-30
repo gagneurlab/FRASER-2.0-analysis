@@ -6,6 +6,7 @@ fileRegex: .*
     
 ### General params
 log_dir: logs
+general_data_dir: "/path/to/data/storage"
 DATADIR: "/path/to/data/storage/fraser/fraser2" 
 figdir: "/path/to/data/storage/fraser/fraser2/figures"
 PAPER_FIGDIR: "/path/to/data/storage/fraser/fraser2/figures/paper_figures"

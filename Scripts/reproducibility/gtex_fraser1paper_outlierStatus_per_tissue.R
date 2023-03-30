@@ -23,8 +23,8 @@
 #'     - annotation:    '`sm config["gtex_sample_anno"]`'
 #'     - leafcutterMD: '`sm get_leafcutterMD_tissue_clean`'
 #'     - spot:    '`sm get_spot_tissue_clean`'
-#'     - fraser:  '`sm "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}__old_filter--gencode34/padjBetaBinomial_theta.h5"`'
-#'     - results_fraser:   '`sm "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
+#'     - fraser:  '`sm config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}__old_filter--gencode34/padjBetaBinomial_theta.h5"`'
+#'     - results_fraser:   '`sm config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
 #'     - fraser2:  '`sm config["DATADIR"] + "/GTEx_v8/fds/minK20_25_minN10/PCA__pc0.1/savedObjects/{dataset}__optQ__newFilt/padjBetaBinomial_rho1_jaccard.h5"`'
 #'     - results_fraser2:   '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_results/minK20_25_minN10/PCA__pc0.1/{dataset}/optQ__newFilt/delta{deltaPsi}/results_gene.tsv"`'
 #'   output:

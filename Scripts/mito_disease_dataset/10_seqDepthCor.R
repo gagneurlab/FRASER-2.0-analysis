@@ -14,7 +14,7 @@
 #'                          "/results/{implementation}/" + config["mito_annotation"] + "/" +
 #'                          config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + 
 #'                          "/deltaJaccard{delta}/results_per_junction_blacklist.tsv", delta=config["deltaCutoff"], allow_missing=True)`'
-#'   - filtered_fds_FRASER: '/s/project/prokisch/processed_results/aberrant_splicing/datasets/savedObjects/fib--gencode34/fds-object.RDS'
+#'   - filtered_fds_FRASER: '`sm config["general_data_dir"] + "/prokisch/processed_results/aberrant_splicing/datasets/savedObjects/fib--gencode34/fds-object.RDS"`'
 #'   - filtered_fds_FRASER2: '`sm config["mito_processed_results"] + 
 #'                "/datasets/{implementation}/savedObjects/" + 
 #'                config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + "--" + config["mito_annotation"] + 

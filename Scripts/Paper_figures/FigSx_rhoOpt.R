@@ -8,7 +8,7 @@
 #'   resources:
 #'     - mem_mb: 12000
 #'   input:
-#'     - fraser2_fds_pc01: '`sm config["DATADIR"] + "/GTEx_v8/fds/minK20_5_minN10/PCA__pc0.1/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic__optQ__newFilt/pvaluesBetaBinomial_junction_jaccard.h5"`'
+#'     - fraser2_fds_pc01: '`sm config["DATADIR"] + "/GTEx_v8/fds/minK20_25_minN10/PCA__pc0.1/savedObjects/Skin_-_Not_Sun_Exposed_Suprapubic__optQ__newFilt/pvaluesBetaBinomial_junction_jaccard.h5"`'
 #'     - pr_curve: '`sm config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER2_goodnessOfFit_rv_recall_plots_rareAbSplice.Rds"`'
 #'     - rho_optimization: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/parameter_optimization_rv_recallAt{x}_ggplots.Rds"`'
 #'   output:
@@ -66,7 +66,8 @@ rho_optimization <- param_optimizations[["rho_opt_fixed_pc"]] +
 
 #+ read in fds objects
 fds <- loadFraserDataSet(file=snakemake@input$fraser2_fds_pc01)
-jidx <- 850 # 836 (quantile=25%) # 835 (quantile=95%)
+jidx <- 836 # 850 (quantile=5%) # 835 (quantile=95%)
+rowRanges(fds, type="j")[jidx,]
 rho_example <- plotExpression(fds, idx=jidx, type="jaccard", padjCutoff=0.1)
 rho_example <- rho_example +
     theme_pubr() + 

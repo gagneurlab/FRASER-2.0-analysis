@@ -13,7 +13,7 @@
 #'    dna_ids = f.read().splitlines()
 #'  input:
 #'   - dna_id_list: '`sm config["mito_processed_data"] + "/variants/prokisch_dna_ids.txt"`'
-#'   - sample_variants: '`sm expand("/s/project/mitoMultiOmics/raw_data/helmholtz/{dnaID}/exomicout/paired-endout/processedData/vep_anno_{dnaID}_uniq_dt.Rds", dnaID=dna_ids)`'
+#'   - sample_variants: '`sm expand(config["general_data_dir"] + "/mitoMultiOmics/raw_data/helmholtz/{dnaID}/exomicout/paired-endout/processedData/vep_anno_{dnaID}_uniq_dt.Rds", dnaID=dna_ids)`'
 #'   - omim_genes: '`sm config["omim_genes"]`'
 #'  output:
 #'   - rare_omim_variants: '`sm config["mito_processed_data"] + "/variants/rare_omim_variants_MAF{maf}_all.Rds"`'

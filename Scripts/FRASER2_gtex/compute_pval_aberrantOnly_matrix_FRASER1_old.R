@@ -6,7 +6,7 @@
 #'   resources:
 #'     - mem_mb: 100000
 #'   input:
-#'     - fraser1_fds: "/s/project/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}__old_filter--gencode34/padjBetaBinomial_theta.h5"
+#'     - fraser1_fds: config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}__old_filter--gencode34/padjBetaBinomial_theta.h5"
 #'   output:
 #'     - pval_aberrant_matrix: '`sm config["DATADIR"] + "/{dataset_group}/{dataset}/minK20_95_minN1/PCA/FRASER1_optQ/{psiType}/pval_aberrant_matrix__delta{delta}.tsv.gz"`'
 #'   type: script

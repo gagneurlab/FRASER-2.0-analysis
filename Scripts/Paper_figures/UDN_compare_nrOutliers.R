@@ -16,7 +16,7 @@
 #'                          "/udn/FRASER2_results/minK{k}_{quant}_minN{n}/{implementation}/" +
 #'                          "{dataset}/optQ__newFilt/delta{delta}/results_gene_FDRomim.tsv", 
 #'                          dataset=config["udn_datasets"], allow_missing=True)`'
-#'   - res_tables_fraser1: '`sm expand("/s/project/genetic_diagnosis/udn/processed_results/aberrant_splicing/results/v29/fraser/{dataset}/results.tsv", 
+#'   - res_tables_fraser1: '`sm expand(config["general_data_dir"] + "/genetic_diagnosis/udn/processed_results/aberrant_splicing/results/v29/fraser/{dataset}/results.tsv", 
 #'                          dataset=config["udn_datasets"])`'
 #'   - fds_fraser2: '`sm expand(config["DATADIR"] + 
 #'                          "/udn/fds/minK{k}_{quant}_minN{n}/{implementation}/savedObjects/" +

@@ -8,8 +8,8 @@
 #'   resources:
 #'     - mem_mb: 15000
 #'   input:
-#'     - variantTable:  "/s/project/absplice/data/results/gtex_v8_with_general_workflow/benchmark_revision/benchmark_fraser_1_outliers.csv"
-#'     - gencode: "/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/gene_name_mapping_gencode34.tsv"
+#'     - variantTable: '`sm config["general_data_dir] + "/absplice/data/results/gtex_v8_with_general_workflow/benchmark_revision/benchmark_fraser_1_outliers.csv"`'
+#'     - gencode: '`sm config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/gene_name_mapping_gencode34.tsv"`'
 #'   output:
 #'     - variantTable: '`sm expand(config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareAbSplice_filtered_VariantsTable.tsv.gz", dataset_vcf_group=config["vcf_files"].keys(), allow_missing=True)`'
 #' output:
@@ -52,7 +52,6 @@ variants <- variants[AbSplice_DNA_max >= absplice_cutoff,]
 
 #
 gencode <- fread(snakemake@input$gencode)
-#gencode <- fread("/s/project/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode34/gene_name_mapping_gencode34.tsv")
 gencode <- gencode[, .(gene_id, gene_name)]
 gencode[, gene_id := gsub("\\..*$", "", gene_id)]
 variants <- merge(variants, gencode, by="gene_id")

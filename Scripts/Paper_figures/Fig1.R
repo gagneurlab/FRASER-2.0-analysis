@@ -19,13 +19,13 @@
 # # bash command for creating pysashimi plot
 # cd Projects/external_tools/pysashimi/
 # conda activate pysashimi_is
-# python main.py -g ../../Test/gencode.v34.annotation.gtf -b /s/project/fraser/fraser2/figures/paper_figures/pysashimi/bam_sa_sashimi.tsv -e 12:52677250-52677800:- \
-# --config ./settings.ini -o /s/project/fraser/fraser2/figures/paper_figures/pysashimi/ch12_52677250_5267800_psi5_v3.png --remove-empty-gene --threshold 20 --color-factor 3 --indicator-lines 52677645
+# python main.py -g ../../Test/gencode.v34.annotation.gtf -b ~/paper_figures/pysashimi/bam_sa_sashimi.tsv -e 12:52677250-52677800:- \
+# --config ./settings.ini -o ~/paper_figures/pysashimi/ch12_52677250_5267800_psi5_v3.png --remove-empty-gene --threshold 20 --color-factor 3 --indicator-lines 52677645
 # add anno in slides
 # then: convert ch12_52677250_5267800_psi5_v2_annotated.png -trim ch12_52677250_5267800_psi5_v2_annotated_trim.png
 # or:
-# python main.py -g ../../Test/gencode.v34.annotation.gtf -b /s/project/fraser/fraser2/figures/paper_figures/pysashimi/bam_sa_sashimi.tsv -e 12:52677250-52677800:- \
-# --config ./settings.ini -o /s/project/fraser/fraser2/figures/paper_figures/pysashimi/ch12_52677250_5267800_psi5.png --transcripts-to-show KRT1|KRT1-201 \
+# python main.py -g ../../Test/gencode.v34.annotation.gtf -b /~/paper_figures/pysashimi/bam_sa_sashimi.tsv -e 12:52677250-52677800:- \
+# --config ./settings.ini -o ~/paper_figures/pysashimi/ch12_52677250_5267800_psi5.png --transcripts-to-show KRT1|KRT1-201 \
 # --indicator-lines 52677645 --threshold 20 --color-factor 3
 
 saveRDS(snakemake, snakemake@log$snakemake)

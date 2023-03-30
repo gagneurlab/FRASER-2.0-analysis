@@ -12,8 +12,8 @@
 #'                "/datasets/{implementation}/savedObjects/" + 
 #'                config["mito_dataset_name"] + "-minExpr{minK}-quantile{quant}-quantCoverage{minN}" + "--" + config["mito_annotation"] + 
 #'                "/padjBetaBinomial_rho0.1_jaccard.h5"`'
-#'   - sample_anno: '/s/project/genetic_diagnosis/rna_paper/sa_solved.tsv'
-#'   - full_sample_anno: '/s/project/prokisch/sample_annotation.tsv'
+#'   - sample_anno: '`sm config["mito_sample_anno"]`'
+#'   - full_sample_anno: '`sm config["mito_full_sample_anno"]`'
 #'   - rare_omim_variants: '`sm config["mito_processed_data"] + "/variants/rare_omim_variants_MAF{maf}_{varSubset}.Rds"`'
 #'  output:
 #'   - wBhtml: '`sm config["htmlOutputPath"] + "/FRASER_vs_FRASER2/{implementation}/" + 
@@ -29,10 +29,6 @@
 #' output:
 #'   html_document
 #'---
-
-# #'   - gene_name_mapping: '`sm config["gene_name_mapping"]`'
-# #'   - pred_gene_level_dir: '`sm expand("/s/project/absplice/data/results/prokisch_WES/splicing_predictions/pred_gene_level/{pred_type}", pred_type=["spliceai", "mmsplice_baseline"])`'
-# #'   - raw_pred_dir: '`sm "/s/project/absplice/data/results/prokisch_WES/splicing_predictions/raw_pred/{pred_type}"`'
 
 saveRDS(snakemake, snakemake@log$snakemake)
 
