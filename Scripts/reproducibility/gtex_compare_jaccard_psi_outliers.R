@@ -8,10 +8,10 @@
 #'   resources:
 #'     - mem_mb: 24000
 #'   input:
-#'     - res_fraser1: '`sm  config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
+#'     - res_fraser1: '`sm config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv"`'
 #'     - res_fraser2: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_results/minK{k}_{q}_minN{n}/{implementation}/{dataset}/optQ__newFilt/delta{delta}/results_gene.tsv"`'
 #'     - fds_fraser2: '`sm config["DATADIR"] + "/GTEx_v8/fds/minK{k}_{q}_minN{n}/{implementation}/savedObjects/{dataset}__optQ__newFilt/fds-object.RDS"`'
-#'     - fds_fraser1: '`sm  "config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter--gencode34/fds-object.RDS"`'
+#'     - fds_fraser1: '`sm config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter--gencode34/fds-object.RDS"`'
 #'   output:
 #'     - wBhtml: '`sm config["htmlOutputPath"] + "/GTEx_v8/fraser2_improvements/{dataset}/minK{k}_{q}_minN{n}/{implementation}/delta{delta}/optQ/jaccard_to_psi_comparison.html"`'
 #'     - res_fraser1_anno: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/{dataset}/minK{k}_{q}_minN{n}/{implementation}/delta{delta}/optQ/fraser1_res_with_jaccard.tsv"`'

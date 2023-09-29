@@ -8,8 +8,8 @@
 #'  resources:
 #'   - mem_mb: 64000
 #'  input:
-#'   - data:   '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSplicing__0.0_reproducibility.RDS"`'
-#'   - table:  '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSplicing__0.0_reproducibility.tsv.gz"`'
+#'   - data:   '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSpliceSite__0.0_reproducibility.RDS"`'
+#'   - table:  '`sm config["DATADIR"] + "/GTEx_v8/reproducibility_fraser1paper/rareSpliceSite__0.0_reproducibility.tsv.gz"`'
 #'  output:
 #'   - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_reproducibility.png"`'
 #'   - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_reproducibility.pdf"`'

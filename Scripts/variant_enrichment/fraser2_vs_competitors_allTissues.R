@@ -10,7 +10,7 @@
 #'     return config["DATADIR"] + "/GTEx_v8/variant_extraction/" + wildcards.snptype + "_filtered_VariantsTable.tsv.gz"
 #'   threads: 5
 #'   resources:
-#'     - mem_mb: 600000
+#'     - mem_mb: 750000
 #'   input:
 #'     - SPOT: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/SPOT_allTissues_pvals_for_rv.Rds"`'
 #'     - LeafcutterMD: '`sm config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/LeafcutterMD_allTissues_pvals_for_rv.Rds"`'

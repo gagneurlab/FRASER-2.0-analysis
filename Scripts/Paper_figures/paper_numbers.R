@@ -234,7 +234,8 @@ dt <- merge(genes_tested_omim_rv, introns_tested_omim_rv, by="sampleID")
 #' 
 # pathogenic cases
 patho_sa <- fread(snakemake@input$patho_sample_anno)
-patho_sa <- patho_sa[!is.na(FRASER_padj) & !grepl("deletion|cnv", VARIANT_EFFECT),]
+patho_sa <- patho_sa[!is.na(FRASER_padj),]
+# patho_sa <- patho_sa[!grepl("deletion|cnv", VARIANT_EFFECT),]
 patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"]
 patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
 #'
@@ -272,7 +273,7 @@ DT::datatable(
 fdr_dt[, tmp := paste(sampleID, gene_symbol, sep="_")]
 DT::datatable(
     fdr_dt[tmp %in% not_found][, .SD[which.min(pval)] ,by="tmp"],
-    caption = 'Pathogenic cases (Yepez et al.) found with FRASER 2.0',
+    caption = 'Pathogenic cases (Yepez et al.) not found with FRASER 2.0',
     options=list(scrollX=TRUE),
     escape=FALSE,
     filter = 'top'

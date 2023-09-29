@@ -18,6 +18,7 @@
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig4.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig4.pdf"`'
+#'    - outTiff: '`sm config["PAPER_FIGDIR"] + "/Fig4.tiff"`'
 #'   type: script
 #'---
 
@@ -104,7 +105,8 @@ upset_dt <- fdr_comparison_plots[["gg_upset"]]$data
 upset_dt[, tmp := sapply(comb, FUN=function(x) paste(unlist(x), collapse="-"))]
 set_order <- c(
     "FRASER-FRASER2-FRASER2 (OMIM + RV)-pathogenic splice defect",
-    "FRASER-FRASER2-pathogenic splice defect",                    
+    "FRASER-FRASER2-pathogenic splice defect",
+    "FRASER-pathogenic splice defect",
     "FRASER-FRASER2 (OMIM + RV)-pathogenic splice defect",
     "FRASER2-FRASER2 (OMIM + RV)-pathogenic splice defect",
     "FRASER-FRASER2 (OMIM + RV)",
@@ -152,19 +154,21 @@ upset_plot <- ggplot(upset_dt, aes(x=comb)) +
                 panel.border = element_blank()
             )
     }) + 
-    labs(x="", y="") +
+    labs(x="", y="Event count") +
     geom_text(aes(label = ..count..), stat = 'count', nudge_y = 500, 
               size=font_size/.pt) +
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
-    theme_combmatrix(combmatrix.label.text = element_text(size=font_size, 
-                                                          family = font)) + 
+    theme_combmatrix() +
+    # theme_combmatrix(combmatrix.label.width=unit(3, "cm")) +
+    theme(axis.title.y=element_text(vjust=-45)) +
     cowplot::background_grid(major="y", minor="y")
-# upset_plot
+upset_plot
 
 #+ power analysis results
 # pathogenic cases
 patho_sa <- fread(snakemake@input$patho_sample_anno)
-patho_sa <- patho_sa[!is.na(FRASER_padj) & !grepl("deletion|cnv", VARIANT_EFFECT),]
+patho_sa <- patho_sa[!is.na(FRASER_padj),]
+# patho_sa <- patho_sa[!grepl("deletion|cnv", VARIANT_EFFECT),]
 # patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"] 
 patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "C19orf70"]
 patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
@@ -173,10 +177,11 @@ patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
 res_tps <- fread(snakemake@input$power_analysis_full_res_patho)
 # dont show sizes 70 and 90 in final plot
 res_tps <- res_tps[!size %in% c(70, 90)]
+res_tps[, dataset := "Yepez et al. samples only"]
 
 # plot proportion of recovered pathogenic cases
-gprop <- ggplot(res_tps[padjustGene <= 0.1, .(Noutliers=.N, prop=.N/length(patho_tmp)), by=.(size, sim, FDR_set)], 
-                aes(as.factor(size), prop)) +
+gprop <- ggplot(res_tps[padjustGene <= 0.1, .(Noutliers=.N, prop=.N/length(patho_tmp)), by=.(size, sim, FDR_set, dataset)], 
+                aes(as.factor(size), prop)) + 
     geom_beeswarm(groupOnX=TRUE, size=point_size) +  
     labs(
         y = paste0('Fraction of recovered\n splicing outliers (n=', length(patho_tmp), ')'),
@@ -194,7 +199,7 @@ gg_row2 <- ggarrange(
     nrow=1, ncol=2,
     labels=LETTERS[2:3],
     font.label = list(size = 12, color = "black", face = "bold"),#, family = "Arial"),
-    widths=c(1.5,1)
+    widths=c(1.9,1)
 )
 gg_figure <- ggarrange(g_boxplot_all,
                        gg_row2,
@@ -205,5 +210,6 @@ gg_figure <- ggarrange(g_boxplot_all,
 gg_figure
 
 #+ save figure as png and pdf
-ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=0.8*page_width, unit=width_unit) 
-ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=0.8*page_width, unit=width_unit) 
+ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=0.8*page_width, unit=width_unit, dpi=300) 
+ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=0.8*page_width, unit=width_unit, dpi=300) 
+ggsave(plot=gg_figure, filename=snakemake@output$outTiff, width=page_width, height=0.8*page_width, unit=width_unit, dpi=300) 

@@ -9,13 +9,14 @@
 #'     - mem_mb: 12000
 #'   input:
 #'     - global_qq: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/optQ/PCA__pc0.1/Skin_-_Not_Sun_Exposed_Suprapubic/global_qqPlots.Rds"`'
-#'     - variant_recall_all_tissues: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/plot_rds/FRASER2_vs_others_allTissues_rv_recall_plots_{varType}.Rds", varType=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
+#'     - variant_recall_all_tissues: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/plot_rds/FRASER2_vs_others_allTissues_rv_recall_plots_{varType}.Rds", varType=["rareSplicing", "rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
 #'     - nr_outliers_per_sample:  '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/delta0.1/nrOutliers_comparison_ggplot.Rds"`'
 #'     - comb_outliers_rds: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_25_minN10/PCA__pc0.1/optQ/delta0.1/combined_outliers_venn.Rds"`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig2.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig2.pdf"`'
 #'    - outSvg: '`sm config["PAPER_FIGDIR"] + "/Fig2.svg"`'
+#'    - outTiff: '`sm config["PAPER_FIGDIR"] + "/Fig2.tiff"`'
 #'   type: script
 #'---
 
@@ -71,27 +72,35 @@ venn_plot
 
 #+ precision rank plot jointly on all tissues
 var_recall_all_VEP <- readRDS(snakemake@input$variant_recall_all_tissues[[1]])
-var_recall_all_SpliceAI <- readRDS(snakemake@input$variant_recall_all_tissues[[2]])
-var_recall_all_MMSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[3]])
-var_recall_all_AbSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[4]])
+var_recall_all_VEP_spliceSite <- readRDS(snakemake@input$variant_recall_all_tissues[[2]])
+var_recall_all_SpliceAI <- readRDS(snakemake@input$variant_recall_all_tissues[[3]])
+var_recall_all_MMSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[4]])
+var_recall_all_AbSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[5]])
 maxRank <- 5e6
 maxRankForPlot <- 3e6
 
 recall_rank_dt <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+                        (var_recall_all_VEP_spliceSite[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare direct splice site\nvariant (VEP)"],
                         (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare SpliceAI"],
                         (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare MMSplice"],
                         (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare AbSplice"])
 dt4cutoffs <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+                     (var_recall_all_VEP_spliceSite[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare direct splice site\nvariant (VEP)"],
                      (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare SpliceAI"],
                      (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare MMSplice"],
                      (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare AbSplice"])
-recall_rank_dt[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
-dt4cutoffs[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
+recall_rank_dt[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare direct splice site\nvariant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
+dt4cutoffs[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare direct splice site\nvariant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
 # var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare AbSplice")
-var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice")
+var_sets_to_show <- c("rare direct splice site\nvariant (VEP)", #"rare splice site vicinity\n(VEP)",
+                        "rare MMSplice", "rare SpliceAI", "rare AbSplice")
 recall_rank_dt[Method == "FRASER2", Method := "FRASER 2.0"]
 dt4cutoffs[Method == "FRASER2", Method := "FRASER 2.0"]
-methods_to_show <- c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0")
+recall_rank_dt[Method == "LeafcutterMD", Method := "LeafCutterMD"]
+dt4cutoffs[Method == "LeafcutterMD", Method := "LeafCutterMD"]
+methods_to_show <- c("LeafCutterMD", "SPOT", "FRASER", "FRASER 2.0")
+recall_rank_dt[, Method:=factor(Method, levels=methods_to_show)]
+dt4cutoffs[, Method:=factor(Method, levels=methods_to_show)]
 recall_rank_dt <- recall_rank_dt[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
 dt4cutoffs <- dt4cutoffs[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
 g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
@@ -101,7 +110,7 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
     geom_abline(intercept=0, slope=var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$layers[[3]]$data$slope, 
                 col="firebrick", linetype="dashed") + 
     scale_shape_discrete(labels=function(x)parse(text=x)) +
-    scale_color_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4", "violetred")) +
+    scale_color_manual(values=c("LeafCutterMD"="orange", "SPOT"="darkolivegreen", "FRASER"="dodgerblue3", "FRASER 2.0"="purple4")) +
     scale_x_continuous(breaks=seq(0, maxRankForPlot, by=1e6),
                        labels=function(x) ifelse(x == 3e6, "", scientific_10(x)),
                        # labels=scientific_10,
@@ -113,7 +122,7 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
            shape=guide_legend(order=2,nrow=2, title="Nominal\np-value\ncutoff")) + 
     theme_manuscript(fig_font=font, fig_font_size=font_size) +
     cowplot::background_grid(major="xy", minor="xy") 
-# g_var_rank_rec
+g_var_rank_rec
 
 ### nr of outliers per sample comparison
 nr_outliers_per_sample_dt_gtex <- readRDS(snakemake@input$nr_outliers_per_sample)$data
@@ -176,6 +185,7 @@ gg_figure <- ggarrange(row1,
 gg_figure
 
 #+ save figure as png and pdf
-ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=1.5*page_width, unit=width_unit)
-ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=1.5*page_width, unit=width_unit)
+ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=page_width, height=1.5*page_width, unit=width_unit, dpi=300)
+ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=page_width, height=1.5*page_width, unit=width_unit, dpi=300)
 ggsave(plot=gg_figure, filename=snakemake@output$outSvg, width=page_width, height=1.5*page_width, unit=width_unit, dpi=350)
+ggsave(plot=gg_figure, filename=snakemake@output$outTiff, width=page_width, height=1.5*page_width, unit=width_unit, dpi=350)

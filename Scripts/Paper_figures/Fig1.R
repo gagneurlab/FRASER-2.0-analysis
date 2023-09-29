@@ -8,11 +8,12 @@
 #'   resources:
 #'     - mem_mb: 12000
 #'   input:
-#'     - variant_enrich_comparison: '`sm expand(config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER_vs_jaccard_rv_recall_plots_rare{snptype}.Rds", snptype=["Splicing", "MMSplice", "SpliceAI", "AbSplice"])`'
-#'     - variant_enrich_comparison_all: '`sm expand(config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_rare{snptype}.Rds", snptype=["Splicing", "MMSplice", "SpliceAI", "AbSplice"])`'
+#'     - variant_enrich_comparison: '`sm expand(config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER_vs_jaccard_rv_recall_plots_rare{snptype}.Rds", snptype=["SpliceSite", "MMSplice", "SpliceAI", "AbSplice"])`'
+#'     - variant_enrich_comparison_all: '`sm expand(config["DATADIR"] + "/GTEx_v8/Skin_-_Not_Sun_Exposed_Suprapubic/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_rare{snptype}.Rds", snptype=["SpliceSite", "MMSplice", "SpliceAI", "AbSplice"])`'
 #'   output:
 #'    - outSvg: '`sm config["PAPER_FIGDIR"] + "/Fig1d.svg"`'
 #'    - outTiff: '`sm config["PAPER_FIGDIR"] + "/Fig1d.tiff"`'
+#'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig1d.png"`'
 #'   type: script
 #'---
 
@@ -58,18 +59,18 @@ getMetricLabels <- function(methods){
            FUN.VALUE = c(bquote(psi[3])))
 }
 
-recall_rank_dt <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+recall_rank_dt <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare direct splice site\nvariant (VEP)"], # "rare splice site vicinity\n(VEP)"],
                          (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare SpliceAI"],
                          (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare MMSplice"],
                          (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$data)[,snptype := "rare AbSplice"])
-dt4cutoffs <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+dt4cutoffs <- rbind( (var_recall_all_VEP[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare direct splice site\nvariant (VEP)"], # "rare splice site vicinity\n(VEP)"],
                      (var_recall_all_SpliceAI[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare SpliceAI"],
                      (var_recall_all_MMSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare MMSplice"],
                      (var_recall_all_AbSplice[[paste0('recall_n=', maxRank)]]$layers[[2]]$data)[,snptype := "rare AbSplice"])
-recall_rank_dt[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
-dt4cutoffs[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
+recall_rank_dt[, snptype := factor(snptype, levels=c("rare direct splice site\nvariant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))] # "rare splice site vicinity\n(VEP)", 
+dt4cutoffs[, snptype := factor(snptype, levels=c("rare direct splice site\nvariant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))] # "rare splice site vicinity\n(VEP)", 
 # var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare AbSplice")
-var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice")
+var_sets_to_show <- c("rare direct splice site\nvariant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice")
 methods_to_show <- c("FRASER", "IntronJaccardIndex")
 recall_rank_dt <- recall_rank_dt[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
 dt4cutoffs <- dt4cutoffs[snptype %in% var_sets_to_show & Method %in% methods_to_show,]
@@ -100,3 +101,4 @@ g_var_rank_rec  <- ggplot(recall_rank_dt, aes(rank, recall, col=Method)) +
 #+ save figure as png and pdf
 ggsave(plot=g_var_rank_rec, filename=snakemake@output$outSvg, width=1.33*page_width, height=page_width, unit=width_unit, dpi=350)
 ggsave(plot=g_var_rank_rec, filename=snakemake@output$outTiff, width=1.33*page_width, height=page_width, unit=width_unit, dpi=350)
+ggsave(plot=g_var_rank_rec, filename=snakemake@output$outPng, width=1.33*page_width, height=page_width, unit=width_unit, dpi=350)

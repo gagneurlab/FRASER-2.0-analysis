@@ -29,6 +29,7 @@ suppressPackageStartupMessages({
     library(VariantAnnotation)
     library(ensemblVEP)
     library(BiocParallel)
+    library(parallel)
     library(BBmisc)
 })
 source("src/R/enrichment_helper.R")
@@ -87,6 +88,11 @@ if(curType == "rareSplicing"){
 } else if(curType == "rareModerateNHigh"){
     csqdt <- csqdt[IMPACT %in% c('MODERATE', 'HIGH')]
     csqdt <- csqdt[BIOTYPE %in% c('protein_coding', 'lincRNA')]
+} else if(curType == "rareSpliceSite"){
+    csqdt <- csqdt[grepl("splice_(donor|acceptor)_variant", Consequence)]
+    csqdt <- csqdt[BIOTYPE %in% c('protein_coding', 'lincRNA',
+                                  'retained_intron', 'nonsense_mediated_decay',
+                                  'processed_transcript')]
 } else {
     stop("Please add your variant type to the script!")
 }

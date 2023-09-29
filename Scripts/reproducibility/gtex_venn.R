@@ -9,7 +9,7 @@
 #'     - mem_mb: 15000
 #'   input:
 #'     - res_fraser2: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_results/minK{k}_{q}_minN{n}/{implementation}/{dataset}/optQ__newFilt/delta{delta}/results_gene.tsv", dataset=config["tissues_for_reproducibility"], allow_missing=True)`'
-#'     - res_fraser1: '`sm  expand(config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv", dataset=config["tissues_for_reproducibility"], allow_missing=True)`'
+#'     - res_fraser1: '`sm  expand(config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_results/aberrant_splicing/results/gencode34/fraser/{dataset}_old_filter/results.tsv", dataset=config["tissues_for_reproducibility"], allow_missing=True)`'
 #'   output:
 #'     - comb_outliers_rds: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK{k}_{q}_minN{n}/{implementation}/optQ/delta{delta}/combined_outliers_venn.Rds"`'
 #'   type: script

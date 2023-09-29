@@ -8,7 +8,7 @@
 #'   resources:
 #'     - mem_mb: 32000
 #'   input:
-#'     - variant_recall_all_tissues: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/plot_rds/FRASER2_vs_others_fdrSignif_allTissues_rv_recall_plots_{snptype}.Rds", snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
+#'     - variant_recall_all_tissues: '`sm expand(config["DATADIR"] + "/GTEx_v8/FRASER2_enrichment/plot_rds/FRASER2_vs_others_fdrSignif_allTissues_rv_recall_plots_{snptype}.Rds", snptype=["rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_precision_recall_FDRsignif.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_precision_recall_FDRsignif.pdf"`'
@@ -42,18 +42,18 @@ var_recall_all_AbSplice <- readRDS(snakemake@input$variant_recall_all_tissues[[4
 # maxRank <- 5e6
 # maxRankForPlot <- 3e6
 
-recall_rank_dt <- rbind( (var_recall_all_VEP$precision_recall$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+recall_rank_dt <- rbind( (var_recall_all_VEP$precision_recall$data)[,snptype := "rare direct splice site variant (VEP)"],
                          (var_recall_all_SpliceAI$precision_recall$data)[,snptype := "rare SpliceAI"],
                          (var_recall_all_MMSplice$precision_recall$data)[,snptype := "rare MMSplice"],
                          (var_recall_all_AbSplice$precision_recall$data)[,snptype := "rare AbSplice"])
-dt4cutoffs <- rbind( (var_recall_all_VEP$precision_recall$layers[[2]]$data)[,snptype := "rare splice site vicinity\n(VEP)"],
+dt4cutoffs <- rbind( (var_recall_all_VEP$precision_recall$layers[[2]]$data)[,snptype := "rare direct splice site variant (VEP)"], #"rare splice site vicinity\n(VEP)"],
                      (var_recall_all_SpliceAI$precision_recall$layers[[2]]$data)[,snptype := "rare SpliceAI"],
                      (var_recall_all_MMSplice$precision_recall$layers[[2]]$data)[,snptype := "rare MMSplice"],
                      (var_recall_all_AbSplice$precision_recall$layers[[2]]$data)[,snptype := "rare AbSplice"])
-recall_rank_dt[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
-dt4cutoffs[, snptype := factor(snptype, levels=c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
-# var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare AbSplice")
-var_sets_to_show <- c("rare splice site vicinity\n(VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice")
+recall_rank_dt[, snptype := factor(snptype, levels=c("rare direct splice site variant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
+dt4cutoffs[, snptype := factor(snptype, levels=c("rare direct splice site variant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice"))]
+# var_sets_to_show <- c("rare direct splice site variant (VEP)", "rare AbSplice")
+var_sets_to_show <- c("rare direct splice site variant (VEP)", "rare MMSplice", "rare SpliceAI", "rare AbSplice")
 recall_rank_dt[Method == "FRASER2", Method := "FRASER 2.0"]
 dt4cutoffs[Method == "FRASER2", Method := "FRASER 2.0"]
 methods_to_show <- c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0")

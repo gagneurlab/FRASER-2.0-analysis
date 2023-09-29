@@ -8,7 +8,7 @@
 #'   resources:
 #'     - mem_mb: 150000
 #'   input:
-#'     - variant_enrich_comparison_all: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_rare{snptype}.Rds", snptype=["Splicing", "MMSplice", "SpliceAI", "AbSplice"], dataset=config["tissues_for_detailed_analysis"])`'
+#'     - variant_enrich_comparison_all: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_rare{snptype}.Rds", snptype=["SpliceSite", "MMSplice", "SpliceAI", "AbSplice"], dataset=config["tissues_for_detailed_analysis"])`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_recall_jaccard_vs_psi.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/FigSx_recall_jaccard_vs_psi.pdf"`'
@@ -36,7 +36,9 @@ maxLineNchar <- 20
 #+ read in plots and data for the different panels
 tissues <- snakemake@config$tissues_for_detailed_analysis
 tissues <- tissues[tissues != "Skin_-_Not_Sun_Exposed_Suprapubic"]
-tissues <- sort(sample(tissues, 7))
+# tissues <- sample(tissues, 7)
+tissues <- c("Brain_-_Amygdala", "Brain_-_Cortex", "Heart_-_Left_Ventricle", "Liver", "Lung", "Muscle_-_Skeletal", "Whole_Blood") # fix to use same tissues as in initial submission
+tissues <- sort(tissues)
 input_files  <- snakemake@input$variant_enrich_comparison_all
 input_files <- input_files[which(Reduce("+", lapply(tissues, function(x) grepl(x, input_files))) == 1)]
 var_enrich_comp_data <- rbindlist(lapply(input_files, 
@@ -47,6 +49,9 @@ var_enrich_comp_data <- rbindlist(lapply(input_files,
                                              snptype <- gsub(".Rds", "", strsplit(basename(file), "_")[[1]][8])
                                              if(snptype == "rareSplicing"){
                                                  recall_dt[, snptype:="rare splice site vicinity\n(VEP)"]
+                                             }
+                                             if(snptype == "rareSpliceSite"){
+                                                 recall_dt[, snptype:="rare direct splice site\nvariant (VEP)"]
                                              }
                                              if(snptype == "rareMMSplice"){
                                                  recall_dt[, snptype:="rare MMSplice"]
@@ -80,7 +85,7 @@ var_enrich_comp_data <- rbindlist(lapply(input_files,
 method_order <- c("psi5", "psi3", "theta", "FRASER", "IntronJaccardIndex")
 var_enrich_comp_data[, Method := factor(Method, method_order)]
 var_enrich_comp_data[, snptype := factor(snptype, 
-                                         levels=c("rare splice site vicinity\n(VEP)", 
+                                         levels=c("rare direct splice site\nvariant (VEP)", #"rare splice site vicinity\n(VEP)", 
                                                     "rare MMSplice", 
                                                     "rare SpliceAI", 
                                                     "rare AbSplice"))]

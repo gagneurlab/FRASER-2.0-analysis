@@ -13,6 +13,7 @@
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/Fig3.png"`'
 #'    - outPdf: '`sm config["PAPER_FIGDIR"] + "/Fig3.pdf"`'
+#'    - outTiff: '`sm config["PAPER_FIGDIR"] + "/Fig3.tiff"`'
 #'   type: script
 #'---
 
@@ -43,7 +44,8 @@ scientific_10 <- function(x) {parse(text=gsub("e\\+*", " %*% 10^",
 seq_depth_cor_tissue_plot <- readRDS(snakemake@input$seq_depth_cor_tissue)
 seq_depth_dt <- seq_depth_cor_tissue_plot$data
 seq_depth_dt[method == "FRASER2", method := "FRASER 2.0"]
-seq_depth_dt[, method := factor(method, levels=c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0"))]
+seq_depth_dt[method == "LeafcutterMD", method := "LeafCutterMD"]
+seq_depth_dt[, method := factor(method, levels=c("LeafCutterMD", "SPOT", "FRASER", "FRASER 2.0"))]
 seq_depth_dt[, cor_coef := round(cor(record_count, nr_outliers, method="spearman"), digits=2), by="method"]
 seq_depth_cor_tissue_plot <- ggscatter(seq_depth_dt, 
                                        x="record_count", y="nr_outliers_plus_one", 
@@ -71,14 +73,15 @@ seq_depth_cor_all_plot <- readRDS(snakemake@input$seq_depth_cor_all)
 cor_all_dt <- seq_depth_cor_all_plot$data
 cor_all_melt <- melt(cor_all_dt, id.vars="tissue", value.name="cor_coef", variable.name="method")
 cor_all_melt[method == "FRASER2", method := "FRASER 2.0"]
-cor_all_melt[, method := factor(method, levels=c("LeafcutterMD", "SPOT", "FRASER", "FRASER 2.0"))]
+cor_all_melt[method == "LeafcutterMD", method := "LeafCutterMD"]
+cor_all_melt[, method := factor(method, levels=c("LeafCutterMD", "SPOT", "FRASER", "FRASER 2.0"))]
 seq_depth_cor_all_plot <- ggplot(cor_all_melt[tissue != "Minor_Salivary_Gland"], aes(method, cor_coef, fill=method)) +
     geom_boxplot(outlier.size=point_size) +
     scale_fill_manual(values=c("orange", "darkolivegreen", "dodgerblue3", "purple4", "violetred")) +
     stat_compare_means( 
                        # aes(label = paste0("p = ", after_stat(p.format))),
                        paired=TRUE,
-                       comparisons=list( c("FRASER 2.0", "LeafcutterMD"), c("FRASER 2.0", "SPOT"), c("FRASER 2.0", "FRASER") ),
+                       comparisons=list( c("FRASER 2.0", "LeafCutterMD"), c("FRASER 2.0", "SPOT"), c("FRASER 2.0", "FRASER") ),
                        step.increase=0.2, 
                        vjust=-0.1,
                        size = font_size/.pt
@@ -102,5 +105,7 @@ gg_figure <- ggarrange(seq_depth_cor_tissue_plot,
 gg_figure
 
 #+ save figure as png and pdf
-ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=0.7*page_width, height=1*page_width, unit=width_unit)
-ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=0.7*page_width, height=1*page_width, unit=width_unit)
+ggsave(plot=gg_figure, filename=snakemake@output$outPng, width=114, height=1*page_width, unit=width_unit, dpi=300)
+ggsave(plot=gg_figure, filename=snakemake@output$outPdf, width=114, height=1*page_width, unit=width_unit, dpi=300)
+ggsave(plot=gg_figure, filename=snakemake@output$outTiff, width=114, height=1*page_width, unit=width_unit, dpi=300)
+# width=page_width

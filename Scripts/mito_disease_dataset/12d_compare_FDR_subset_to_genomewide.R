@@ -73,7 +73,7 @@ fds2_FDRfull <- loadFraserDataSet(file=snakemake@input$fraser2_fds)
 omim_genes <- fread(snakemake@input$omim_genes)
 
 #+ get nr of outliers per sample on FDR subset
-FDR_cutoff <- snakemake@config$padjCutoff
+FDR_cutoff <- snakemake@config$fdrCutoff
 FDR_subset <- metadata(fds2_FDRsub)$FDR_rare_omim
 nr_junc_outliers_per_sample <- FDR_subset[, .SD[FDR_sub <= FDR_cutoff, .N], by="sampleID"]
 nr_junc_outliers_per_sample[, summary(V1)]
@@ -87,7 +87,7 @@ sample_anno <- fread(snakemake@input$sample_anno)
 sample_anno[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"] # symbol was updated
 pathogenic_vars <- sample_anno[!is.na(FRASER_padj),]
 pathogenic_vars[, sampleGene:=paste(RNA_ID, KNOWN_MUTATION, sep="__")]
-pathogenic_vars <- pathogenic_vars[!grepl("deletion|cnv", VARIANT_EFFECT)]
+# pathogenic_vars <- pathogenic_vars[!grepl("deletion|cnv", VARIANT_EFFECT)]
 
 res_gene_fraser1 <- res_gene_fraser1[sampleID %in% sample_anno$RNA_ID,]
 res_gene_fraser1[, sampleGene:=paste(sampleID, hgncSymbol, sep="__")]

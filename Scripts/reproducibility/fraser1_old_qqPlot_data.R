@@ -8,7 +8,7 @@
 #'   resources:
 #'     - mem_mb: 150000
 #'   input:
-#'     - fraser1_fds: '`sm config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter/pvaluesBetaBinomial_junction_theta.h5"`'
+#'     - fraser1_fds: '`sm config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_splicing/datasets/savedObjects/{dataset}_old_filter/pvaluesBetaBinomial_junction_theta.h5"`'
 #'   output:
 #'     - qq_plot_table: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/minK20_95_minN1/optQ/PCA/{dataset}/fraser1_qqPlot_data.tsv.gz"`'
 #'   type: script

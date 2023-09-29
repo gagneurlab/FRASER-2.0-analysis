@@ -8,10 +8,10 @@
 #'   resources:
 #'     - mem_mb: 50000
 #'   input:
-#'     - jaccard_vs_fraser: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_vs_jaccard_rv_recall_data_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
-#'     - jaccard_vs_fraser_types: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
-#'     - pseudocount: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER2_pseudocount_recall_at_x_outliers_rho{rho}_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"], rho=[1, 0.5, 0.2, 0.1, 0.05, 0.025, 0.01, 0.001])`'
-#'     - filtering: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER2_filtering_recall_at_x_outliers_pc0.1_rho1_delta{delta}_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSplicing", "rareSpliceAI", "rareMMSplice", "rareAbSplice"], delta=[0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7])`'
+#'     - jaccard_vs_fraser: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_vs_jaccard_rv_recall_data_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
+#'     - jaccard_vs_fraser_types: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER_types_vs_jaccard_rv_recall_data_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"])`'
+#'     - pseudocount: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER2_pseudocount_recall_at_x_outliers_rho{rho}_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"], rho=[1, 0.5, 0.2, 0.1, 0.05, 0.025, 0.01, 0.001])`'
+#'     - filtering: '`sm expand(config["DATADIR"] + "/GTEx_v8/{dataset}/plot_rds/FRASER2_enrichment/FRASER2_filtering_recall_at_x_outliers_pc0.1_rho1_delta{delta}_{snptype}.Rds", dataset=config["tissues_for_detailed_analysis"], snptype=["rareSpliceSite", "rareSpliceAI", "rareMMSplice", "rareAbSplice"], delta=[0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7])`'
 #'     - filtering_info: '`sm config["DATADIR"] + "/GTEx_v8/fraser2_improvements/filtering_info.tsv"`'
 #'   output:
 #'     - wBhtml: '`sm config["htmlOutputPath"] + "/GTEx_v8/variant_enrichment/all_rv_recallAt{x}.html"`'
@@ -71,8 +71,10 @@ recall_dt[snptype == "rareSpliceAI", snptype:="rare SpliceAI"]
 recall_dt[snptype == "rareMMSplice", snptype:="rare MMSplice"]
 recall_dt[snptype == "rareAbSplice", snptype:="rare AbSplice"]
 recall_dt[snptype == "rareSplicing", snptype:="rare splice\nsite vicinity\n(VEP)"]
+recall_dt[snptype == "rareSpliceSite", snptype:="rare direct\nsplice site\nvariant (VEP)"]
 recall_dt[, snptype:=factor(snptype, levels=c(
                                         "rare splice\nsite vicinity\n(VEP)",
+                                        "rare direct\nsplice site\nvariant (VEP)",
                                         "rare MMSplice",
                                         "rare SpliceAI",
                                         "rare AbSplice"))]
@@ -192,7 +194,9 @@ filtering_dt[snptype == "rareSpliceAI", snptype:="rare SpliceAI"]
 filtering_dt[snptype == "rareAbSplice", snptype:="rare AbSplice"]
 filtering_dt[snptype == "rareMMSplice", snptype:="rare MMSplice"]
 filtering_dt[snptype == "rareSplicing", snptype:="rare splice\nsite vicinity\n(VEP)"]
+filtering_dt[snptype == "rareSpliceSite", snptype:="rare direct\nsplice site\nvariant (VEP)"]
 filtering_dt[, snptype:=factor(snptype, levels=c("rare splice\nsite vicinity\n(VEP)",
+                                                "rare direct\nsplice site\nvariant (VEP)",
                                                 "rare MMSplice",
                                                 "rare SpliceAI", 
                                                 "rare AbSplice"

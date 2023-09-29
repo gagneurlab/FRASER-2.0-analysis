@@ -71,7 +71,7 @@ sample_anno <- fread(snakemake@input$sample_anno)
 sample_anno[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"] # symbol was updated
 pathogenic_vars <- sample_anno[!is.na(FRASER_padj),]
 pathogenic_vars[, sampleGene:=paste(RNA_ID, KNOWN_MUTATION, sep="__")]
-pathogenic_vars <- pathogenic_vars[!grepl("deletion|cnv", VARIANT_EFFECT)]
+# pathogenic_vars <- pathogenic_vars[!grepl("deletion|cnv", VARIANT_EFFECT)]
 
 # subset and get sample-gene pairs
 res_dt_jaccard <- res_dt_jaccard[sampleID %in% sample_anno$RNA_ID,]

@@ -3,17 +3,17 @@
 #' author: Ines Scheller
 #' wb:
 #'   log:
-#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/power_analysis_mito_{FDR_set}.Rds"`'
+#'    - snakemake: '`sm config["log_dir"] + "/snakemake/paper_figures/power_analysis_{dataset}_{FDR_set}.Rds"`'
 #'   threads: 8
 #'   resources:
 #'     - mem_mb: 24000
 #'   input:
-#'   - res_simulations: '`sm expand(config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/results/" + 
+#'   - res_simulations: '`sm expand(config["DATADIR"] + "/power_analysis/{{dataset}}/processed_results/aberrant_splicing/results/" + 
 #'                "v29/fraser/{group}/results.tsv", group=config["power_analysis_datasets"])`'
 #'   - patho_sample_anno: '`sm config["mito_sample_anno"]`' 
 #'   output:
-#'    - comb_results: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_{FDR_set}.tsv"`'
-#'    - patho_results: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/patho_results_{FDR_set}.tsv"`'
+#'    - comb_results: '`sm config["DATADIR"] + "/power_analysis/{dataset}/processed_results/aberrant_splicing/combined_results_{FDR_set}.tsv"`'
+#'    - patho_results: '`sm config["DATADIR"] + "/power_analysis/{dataset}/processed_results/aberrant_splicing/patho_results_{FDR_set}.tsv"`'
 #'   type: script
 #'---
 
@@ -24,6 +24,8 @@ library(data.table)
 library(BiocParallel)
 register(MulticoreParam(snakemake@threads))
 
+dataset <- snakemake@wildcards$dataset
+
 #+ get FDR set
 fdr_set <- snakemake@wildcards$FDR_set
 if(fdr_set == "full"){
@@ -32,16 +34,22 @@ if(fdr_set == "full"){
 
 #+ read in res table and cases to check and extract p values of solved cases
 patho_sa <- fread(snakemake@input$patho_sample_anno)
-patho_sa <- patho_sa[!is.na(FRASER_padj) & !grepl("deletion|cnv", VARIANT_EFFECT),]
+patho_sa <- patho_sa[!is.na(FRASER_padj),]
+# patho_sa <- patho_sa[!grepl("deletion|cnv", VARIANT_EFFECT),]
 # patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"] 
 patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "C19orf70"]
 patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
 
 res_all <- rbindlist(bplapply(snakemake@input$res_simulations, FUN=function(res_file){
     res <- fread(res_file)
-    res <- res[FDR_set == fdr_set,]
+    if("FDR_set" %in% colnames(res)){
+        res <- res[FDR_set == fdr_set,]
+    } else{
+        res[, FDR_set := fdr_set]
+    }
     res[, tmp := paste(sampleID, hgncSymbol, sep="_")]
-    res <- res[, .(sampleID, hgncSymbol, pValue, padjust, pValueGene, padjustGene, psiValue, deltaPsi, FDR_set, tmp)]
+    # res <- res[, .(sampleID, hgncSymbol, pValue, padjust, pValueGene, padjustGene, psiValue, deltaPsi, FDR_set, tmp)]
+    res <- res[, .(sampleID, hgncSymbol, pValue, pValueGene, padjustGene, psiValue, deltaPsi, FDR_set, tmp)]
     group <- basename(dirname(res_file))
     fsplit <- strsplit(group, "_", fixed=TRUE)[[1]]
     res[, group := group]
@@ -49,6 +57,7 @@ res_all <- rbindlist(bplapply(snakemake@input$res_simulations, FUN=function(res_
     res[, sim  := gsub("sim", "run", fsplit[4])]
     return(res)
 }))
+res_all[, dataset:=dataset]
 setorder(res_all, size, sim)
 
 # set name of FDR set for plotting

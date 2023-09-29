@@ -20,7 +20,7 @@
 #'     tissue = tissue.replace('-', '_')
 #'     return config["leafcutterMD_results"] + tissue + "/leafcutterMD_testing/results_" + tissue + ".tsv"
 #'   input:
-#'    - bam_coverage_tsv: '`sm "config["general_data_dir] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode29/outrider/{dataset}/bam_coverage.tsv"`'
+#'    - bam_coverage_tsv: '`sm config["general_data_dir"] + "/gtex_genetic_diagnosis/v8/processed_data/aberrant_expression/gencode29/outrider/{dataset}/bam_coverage.tsv"`'
 #'    - res_SPOT: '`sm get_spot_tissue_clean`'
 #'    - res_LeafcutterMD: '`sm get_leafcutterMD_tissue_clean`'
 #'   output:

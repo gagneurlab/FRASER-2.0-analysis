@@ -10,7 +10,8 @@
 #'   input:
 #'     - power_analysis_full_res_all: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/combined_results_full.tsv"`'
 #'     - power_analysis_full_res_patho: '`sm config["DATADIR"] + "/power_analysis/mito/processed_results/aberrant_splicing/patho_results_full.tsv"`'
-#'     - power_analysis_gtex: '`sm config["DATADIR"] + "/power_analysis/GTEx_v8/processed_results/aberrant_splicing/combined_results.tsv"`'
+#'     - power_analysis_full_res_all_withUDN: '`sm config["DATADIR"] + "/power_analysis/mito_with_extUDN/processed_results/aberrant_splicing/combined_results_full.tsv"`'
+#'     - power_analysis_full_res_patho_withUDN: '`sm config["DATADIR"] + "/power_analysis/mito_with_extUDN/processed_results/aberrant_splicing/patho_results_full.tsv"`'
 #'     - patho_sample_anno: '`sm config["mito_sample_anno"]`'
 #'   output:
 #'    - outPng: '`sm config["PAPER_FIGDIR"] + "/FigSx_power_analysis.png"`'
@@ -36,7 +37,8 @@ width_unit <- snakemake@config$width_unit
 
 #+ pathogenic cases
 patho_sa <- fread(snakemake@input$patho_sample_anno)
-patho_sa <- patho_sa[!is.na(FRASER_padj) & !grepl("deletion|cnv", VARIANT_EFFECT),]
+patho_sa <- patho_sa[!is.na(FRASER_padj),]
+# patho_sa <- patho_sa[!grepl("deletion|cnv", VARIANT_EFFECT),]
 # patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "MICOS13"] 
 patho_sa[KNOWN_MUTATION == "C19ORF70", KNOWN_MUTATION := "C19orf70"]
 patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
@@ -44,7 +46,7 @@ patho_tmp <- patho_sa[, paste(RNA_ID, KNOWN_MUTATION, sep="_")]
 #+ power analysis results (transcriptome_wide)
 res_all <- fread(snakemake@input$power_analysis_full_res_all)
 res_tps <- fread(snakemake@input$power_analysis_full_res_patho)
-res_gtex <- fread(snakemake@input$power_analysis_gtex)
+# res_gtex <- fread(snakemake@input$power_analysis_gtex)
 
 # dont show sizes 70 and 90 in final plot
 res_all <- res_all[!size %in% c(70, 90)]
@@ -99,28 +101,28 @@ gtotal <- ggplot(res_all[padjustGene <= 0.1, .N, by=.(size=factor(size), sim, sa
     cowplot::background_grid(major="y", minor="y")
 gtotal
 
-res_gtex[, aberrant_0_0 := padjustGene <= 0.1 & abs(deltaPsi) >= 0]
-res_gtex[, aberrant_0_1 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.1]
-res_gtex[, aberrant_0_2 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.2]
-res_gtex[, aberrant_0_3 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.3]
-res_gtex_melt <- melt(res_gtex, 
-                      id.vars=c("sampleID","hgncSymbol","size","sim"), 
-                      measure.vars=c("aberrant_0_0", "aberrant_0_1", "aberrant_0_2", "aberrant_0_3"),
-                      variable.name="dJ", 
-                      value.name="aberrantStatus")
-res_gtex_plot <- res_gtex_melt[, .SD[aberrantStatus == TRUE, .N], by=.(size=factor(size), sim, sampleID, dJ)]
-res_gtex_plot <- res_gtex_plot[,.(med=median(V1)),by=.(size, sim, dJ)]
-res_gtex_plot[, dJ := gsub("_", ".", gsub("aberrant_", "", dJ))]
-gtotal_gtex <- ggplot(res_gtex_plot, aes(size, med, col=dJ)) + 
-    geom_beeswarm(size=0.5) +
-    ylim(0, 15) + 
-    labs(
-        x = 'Sample size', 
-        y = 'Median of splicing\noutliers per sample') +
-    guides(color=guide_legend(title=bquote(Delta~J))) +
-    theme_manuscript(fig_font_size=font_size, fig_font=font) + 
-    cowplot::background_grid(major="y", minor="y")
-# gtotal_gtex
+# res_gtex[, aberrant_0_0 := padjustGene <= 0.1 & abs(deltaPsi) >= 0]
+# res_gtex[, aberrant_0_1 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.1]
+# res_gtex[, aberrant_0_2 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.2]
+# res_gtex[, aberrant_0_3 := padjustGene <= 0.1 & abs(deltaPsi) >= 0.3]
+# res_gtex_melt <- melt(res_gtex, 
+#                       id.vars=c("sampleID","hgncSymbol","size","sim"), 
+#                       measure.vars=c("aberrant_0_0", "aberrant_0_1", "aberrant_0_2", "aberrant_0_3"),
+#                       variable.name="dJ", 
+#                       value.name="aberrantStatus")
+# res_gtex_plot <- res_gtex_melt[, .SD[aberrantStatus == TRUE, .N], by=.(size=factor(size), sim, sampleID, dJ)]
+# res_gtex_plot <- res_gtex_plot[,.(med=median(V1)),by=.(size, sim, dJ)]
+# res_gtex_plot[, dJ := gsub("_", ".", gsub("aberrant_", "", dJ))]
+# gtotal_gtex <- ggplot(res_gtex_plot, aes(size, med, col=dJ)) + 
+#     geom_beeswarm(size=0.5) +
+#     ylim(0, 15) + 
+#     labs(
+#         x = 'Sample size', 
+#         y = 'Median of splicing\noutliers per sample') +
+#     guides(color=guide_legend(title=bquote(Delta~J))) +
+#     theme_manuscript(fig_font_size=font_size, fig_font=font) + 
+#     cowplot::background_grid(major="y", minor="y")
+# # gtotal_gtex
 
 #+ combine panels into figure, width=15, height=12
 gg <- ggarrange(
@@ -132,7 +134,7 @@ gg <- ggarrange(
                 font.label=list(size=12, color = "black", face = "bold", family = font),
                 common.legend=TRUE, legend = "bottom"
             )
-# gg
+# gg 
 
 #+ save figure as png and pdf
 ggsave(plot=gg, filename=snakemake@output$outPng, width=page_width, height=0.4*page_width, unit=width_unit, dpi=300) 

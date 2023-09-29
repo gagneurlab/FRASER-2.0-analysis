@@ -4,6 +4,8 @@
 # rare variants
 #  + splicing variants
 #  + high/modest impact
+#  + direct splice site variants
+#  + intronic variants
 #
 
 def get_input_vcf_anno(wildcards):
@@ -48,6 +50,26 @@ rule extractSplicingAnnoFromGTEx:
             vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
             bcftools view --max-af $maxAF --max-alleles 2 {input.vcfanno} | \
                 grep -P '(^#)|([|&]splice_)' | \
+                bgzip -c -l 9 -@ 4 > $vcfAnnoFile
+            tabix $vcfAnnoFile
+        """
+        
+rule extractDirectSpliceSiteAnnoFromGTEx:
+    input: vcfanno = get_input_vcf_anno
+    output: subvcfannotbi = config["DATADIR"] + "/{dataset_vcf_group}/variant_extraction/rareSpliceSiteVariants.vcf.gz.tbi"
+    threads: 3
+    resources:
+        mem_mb = 25000
+    shell:
+        """
+            vcfAnnoFileTbi={output.subvcfannotbi}
+            maxAF=0.05
+            
+            echo {input.vcfanno}
+
+            vcfAnnoFile=${{vcfAnnoFileTbi%.tbi}}
+            bcftools view --max-af $maxAF --max-alleles 2 {input.vcfanno} | \
+                grep -P '(^#)|([|&]splice_(donor|acceptor)_variant)' | \
                 bgzip -c -l 9 -@ 4 > $vcfAnnoFile
             tabix $vcfAnnoFile
         """

@@ -14,7 +14,7 @@ PAPER_FIGDIR: "/path/to/data/storage/fraser/fraser2/figures/paper_figures"
 # paper figure params:
 font_size: 8 
 font: "Helvetica" # "Arial"
-page_width: 178
+page_width: 174
 width_unit: "mm"
 
 # FRASER filtering params
